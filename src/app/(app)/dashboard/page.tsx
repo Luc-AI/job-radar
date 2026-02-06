@@ -1,6 +1,9 @@
-import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { JobWithEvaluation } from "@/types/database";
+import { JobList } from "./JobList";
+
+const PAGE_SIZE = 20;
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -16,7 +19,7 @@ export default async function DashboardPage() {
   // Check if onboarding is completed
   const { data: userData } = await supabase
     .from("users")
-    .select("onboarding_completed, email")
+    .select("onboarding_completed")
     .eq("id", user.id)
     .single();
 
@@ -24,41 +27,67 @@ export default async function DashboardPage() {
     redirect("/onboarding/step-1");
   }
 
+  // Fetch total count and new count
+  const [{ count: totalCount }, { count: newCount }] = await Promise.all([
+    supabase
+      .from("evaluations")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .neq("status", "hidden"),
+    supabase
+      .from("evaluations")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("status", "new"),
+  ]);
+
+  // Fetch first page of evaluations with job data
+  const { data: evaluations, error } = await supabase
+    .from("evaluations")
+    .select(
+      `
+      *,
+      job:jobs(*)
+    `
+    )
+    .eq("user_id", user.id)
+    .neq("status", "hidden")
+    .order("score_total", { ascending: false })
+    .range(0, PAGE_SIZE - 1);
+
+  if (error) {
+    console.error("Error fetching evaluations:", error);
+  }
+
+  const jobs = (evaluations as JobWithEvaluation[]) || [];
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-900">Your Jobs</h1>
         <p className="mt-1 text-slate-600">
           AI-matched opportunities based on your profile
         </p>
       </div>
 
-      <Card>
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-slate-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
-          </div>
-          <h2 className="text-lg font-medium text-slate-900">
-            No jobs yet
-          </h2>
-          <p className="mt-2 text-slate-600 max-w-sm mx-auto">
-            We&apos;re scanning for opportunities that match your profile. Check
-            back soon or wait for your daily digest email.
-          </p>
-        </div>
-      </Card>
+      {/* Stats */}
+      <div className="mb-6 flex items-center gap-4 text-sm">
+        <span className="text-slate-600">
+          <span className="font-semibold text-slate-900">{totalCount || 0}</span>{" "}
+          jobs matched
+        </span>
+        {(newCount || 0) > 0 && (
+          <span className="text-emerald-600 font-medium">
+            {newCount} new today
+          </span>
+        )}
+      </div>
+
+      <JobList
+        initialJobs={jobs}
+        totalCount={totalCount || 0}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   );
 }
