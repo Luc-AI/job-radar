@@ -1,0 +1,80 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+
+export type OnboardingState = {
+  error?: string;
+  fieldErrors?: {
+    roles?: string;
+    locations?: string;
+  };
+  success?: boolean;
+};
+
+export async function saveJobPreferences(
+  prevState: OnboardingState,
+  formData: FormData
+): Promise<OnboardingState> {
+  const supabase = await createClient();
+
+  // Get authenticated user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    redirect("/login");
+  }
+
+  // Parse form data
+  const rolesJson = formData.get("roles") as string;
+  const locationsJson = formData.get("locations") as string;
+  const remoteOk = formData.get("remoteOk") === "true";
+
+  let roles: string[] = [];
+  let locations: string[] = [];
+
+  try {
+    roles = rolesJson ? JSON.parse(rolesJson) : [];
+    locations = locationsJson ? JSON.parse(locationsJson) : [];
+  } catch {
+    return { error: "Invalid form data" };
+  }
+
+  // Validate
+  const fieldErrors: OnboardingState["fieldErrors"] = {};
+
+  if (roles.length === 0) {
+    fieldErrors.roles = "Please add at least one job title or keyword";
+  }
+
+  if (locations.length === 0) {
+    fieldErrors.locations = "Please add at least one location";
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return { fieldErrors };
+  }
+
+  // Save to database
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({
+      pref_roles: roles,
+      pref_locations: locations,
+      pref_remote: remoteOk,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("Error saving preferences:", updateError);
+    return { error: "Failed to save preferences. Please try again." };
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/onboarding/step-2");
+}
