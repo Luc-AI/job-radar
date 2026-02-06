@@ -15,14 +15,17 @@ export default async function OnboardingCompletePage() {
     redirect("/login");
   }
 
-  // Mark onboarding as completed
-  await supabase
+  // Fetch user to get their notification time for display
+  const { data: userData } = await supabase
     .from("users")
-    .update({
-      onboarding_completed: true,
-      is_active: true,
-    })
-    .eq("id", user.id);
+    .select("notify_time")
+    .eq("id", user.id)
+    .single();
+
+  const notifyTime = userData?.notify_time ?? 9;
+  const ampm = notifyTime >= 12 ? "PM" : "AM";
+  const displayHour = notifyTime === 0 ? 12 : notifyTime > 12 ? notifyTime - 12 : notifyTime;
+  const timeDisplay = `${displayHour}:00 ${ampm}`;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -51,7 +54,7 @@ export default async function OnboardingCompletePage() {
 
           <p className="mt-4 text-slate-600 max-w-md mx-auto">
             We&apos;re on it. Our AI will start scanning for jobs that match
-            your profile. Your first matches will arrive in your inbox soon.
+            your profile. Expect your first digest at {timeDisplay}.
           </p>
 
           <div className="mt-8 p-4 bg-slate-50 rounded-lg max-w-sm mx-auto">
