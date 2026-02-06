@@ -13,6 +13,11 @@ export type OnboardingState = {
   success?: boolean;
 };
 
+export type CVUploadState = {
+  error?: string;
+  success?: boolean;
+};
+
 export async function saveJobPreferences(
   prevState: OnboardingState,
   formData: FormData
@@ -77,4 +82,48 @@ export async function saveJobPreferences(
 
   revalidatePath("/", "layout");
   redirect("/onboarding/step-2");
+}
+
+export async function saveCV(
+  prevState: CVUploadState,
+  formData: FormData
+): Promise<CVUploadState> {
+  const supabase = await createClient();
+
+  // Get authenticated user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    redirect("/login");
+  }
+
+  const cvRaw = formData.get("cvRaw") as string;
+
+  if (!cvRaw || cvRaw.trim().length === 0) {
+    return { error: "Please provide your CV content" };
+  }
+
+  if (cvRaw.trim().length < 50) {
+    return { error: "CV content seems too short. Please provide more details about your experience." };
+  }
+
+  // Save to database
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({
+      cv_raw: cvRaw.trim(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("Error saving CV:", updateError);
+    return { error: "Failed to save CV. Please try again." };
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/onboarding/step-3");
 }
