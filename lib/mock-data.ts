@@ -1,0 +1,108 @@
+import { Job } from "./types";
+
+export const mockJobs: Job[] = [
+  {
+    id: "1",
+    title: "Senior Frontend Engineer",
+    company: "Acme Corp",
+    location: "San Francisco, CA",
+    workMode: "hybrid",
+    salary: "$160k – $200k",
+    status: "applied",
+    postedAt: "2026-02-01",
+    tags: ["React", "TypeScript", "Next.js"],
+    description:
+      "Build and maintain our customer-facing web application using React and Next.js.",
+  },
+  {
+    id: "2",
+    title: "Full Stack Developer",
+    company: "Startup Inc",
+    location: "New York, NY",
+    workMode: "remote",
+    salary: "$140k – $180k",
+    status: "saved",
+    postedAt: "2026-02-03",
+    tags: ["Node.js", "React", "PostgreSQL"],
+    description:
+      "Join a small team building a new SaaS platform from the ground up.",
+  },
+  {
+    id: "3",
+    title: "Backend Engineer",
+    company: "DataFlow Systems",
+    location: "Austin, TX",
+    workMode: "onsite",
+    salary: "$150k – $190k",
+    status: "interviewing",
+    postedAt: "2026-01-28",
+    tags: ["Go", "Kubernetes", "AWS"],
+    description:
+      "Design and scale distributed data-processing pipelines serving millions of events per second.",
+  },
+  {
+    id: "4",
+    title: "DevOps Engineer",
+    company: "CloudNine",
+    location: "Seattle, WA",
+    workMode: "remote",
+    salary: "$145k – $175k",
+    status: "saved",
+    postedAt: "2026-02-05",
+    tags: ["Terraform", "AWS", "CI/CD"],
+    description:
+      "Own the infrastructure-as-code strategy and CI/CD pipelines for a growing platform team.",
+  },
+  {
+    id: "5",
+    title: "Product Designer",
+    company: "DesignHub",
+    location: "Los Angeles, CA",
+    workMode: "hybrid",
+    salary: "$130k – $160k",
+    status: "offered",
+    postedAt: "2026-01-20",
+    tags: ["Figma", "UX Research", "Design Systems"],
+    description:
+      "Lead end-to-end product design for a B2B analytics dashboard.",
+  },
+  {
+    id: "6",
+    title: "ML Engineer",
+    company: "NeuralPath AI",
+    location: "Remote",
+    workMode: "remote",
+    salary: "$180k – $230k",
+    status: "rejected",
+    postedAt: "2026-01-15",
+    tags: ["Python", "PyTorch", "MLOps"],
+    description:
+      "Develop and deploy machine-learning models for real-time recommendation systems.",
+  },
+  {
+    id: "7",
+    title: "iOS Developer",
+    company: "AppWorks",
+    location: "Chicago, IL",
+    workMode: "onsite",
+    salary: "$135k – $165k",
+    status: "applied",
+    postedAt: "2026-02-04",
+    tags: ["Swift", "SwiftUI", "Core Data"],
+    description:
+      "Build polished, performant features for a top-50 App Store health & fitness app.",
+  },
+  {
+    id: "8",
+    title: "Site Reliability Engineer",
+    company: "Uptime Labs",
+    location: "Denver, CO",
+    workMode: "hybrid",
+    salary: "$155k – $195k",
+    status: "saved",
+    postedAt: "2026-02-06",
+    tags: ["Linux", "Prometheus", "Go"],
+    description:
+      "Improve observability and incident response for a 99.99% uptime platform.",
+  },
+];
