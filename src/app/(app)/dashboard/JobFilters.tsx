@@ -32,6 +32,7 @@ const STATUS_OPTIONS: { value: EvaluationStatus; label: string }[] = [
   { value: "viewed", label: "Viewed" },
   { value: "saved", label: "Saved" },
   { value: "applied", label: "Applied" },
+  { value: "hidden", label: "Hidden" },
 ];
 
 function FilterDropdown({

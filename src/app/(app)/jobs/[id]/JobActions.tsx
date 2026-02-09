@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { EvaluationStatus } from "@/types/database";
+import { useToast } from "@/components/ui/Toast";
 import { updateJobStatus } from "./actions";
 
 interface JobActionsProps {
@@ -12,15 +13,31 @@ interface JobActionsProps {
   applyUrl: string | null;
 }
 
+const STATUS_MESSAGES: Record<EvaluationStatus, string> = {
+  saved: "Job saved",
+  applied: "Marked as applied",
+  hidden: "Job hidden",
+  viewed: "Job unsaved",
+  new: "Status reset",
+};
+
 export function JobActions({ evaluationId, status, applyUrl }: JobActionsProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [currentStatus, setCurrentStatus] = useState(status);
 
   const handleStatusChange = (newStatus: EvaluationStatus) => {
+    const previousStatus = currentStatus;
     setCurrentStatus(newStatus);
     startTransition(async () => {
-      await updateJobStatus(evaluationId, newStatus);
+      const result = await updateJobStatus(evaluationId, newStatus);
+      if (result.success) {
+        showToast(STATUS_MESSAGES[newStatus], "success");
+      } else {
+        setCurrentStatus(previousStatus);
+        showToast(result.error || "Failed to update status", "error");
+      }
       router.refresh();
     });
   };
