@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { JobWithEvaluation } from "@/types/database";
 import { JobList } from "./JobList";
+import { KpiStats } from "./KpiStats";
 
 const PAGE_SIZE = 20;
 
@@ -27,8 +28,13 @@ export default async function DashboardPage() {
     redirect("/onboarding/step-1");
   }
 
-  // Fetch total count and new count
-  const [{ count: totalCount }, { count: newCount }] = await Promise.all([
+  // Fetch KPI counts
+  const [
+    { count: totalCount },
+    { count: newCount },
+    { count: topMatchCount },
+    { count: savedCount },
+  ] = await Promise.all([
     supabase
       .from("evaluations")
       .select("*", { count: "exact", head: true })
@@ -39,6 +45,17 @@ export default async function DashboardPage() {
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id)
       .eq("status", "new"),
+    supabase
+      .from("evaluations")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .neq("status", "hidden")
+      .gte("score_total", 9),
+    supabase
+      .from("evaluations")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("status", "saved"),
   ]);
 
   // Fetch first page of evaluations with job data
@@ -62,7 +79,7 @@ export default async function DashboardPage() {
   const jobs = (evaluations as JobWithEvaluation[]) || [];
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-900">Your Jobs</h1>
         <p className="mt-1 text-slate-600">
@@ -70,18 +87,13 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="mb-6 flex items-center gap-4 text-sm">
-        <span className="text-slate-600">
-          <span className="font-semibold text-slate-900">{totalCount || 0}</span>{" "}
-          jobs matched
-        </span>
-        {(newCount || 0) > 0 && (
-          <span className="text-emerald-600 font-medium">
-            {newCount} new today
-          </span>
-        )}
-      </div>
+      {/* KPI Stats */}
+      <KpiStats
+        totalJobs={totalCount || 0}
+        newToday={newCount || 0}
+        topMatches={topMatchCount || 0}
+        savedJobs={savedCount || 0}
+      />
 
       <JobList
         initialJobs={jobs}

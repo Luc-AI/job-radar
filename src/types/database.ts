@@ -64,3 +64,6 @@ export interface JobFilters {
   datePosted: DatePosted | null;
   statuses: EvaluationStatus[];
 }
+
+// Sort types for job dashboard
+export type SortOption = 'score_desc' | 'date_desc' | 'date_asc';

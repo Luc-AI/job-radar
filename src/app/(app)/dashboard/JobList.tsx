@@ -4,9 +4,14 @@ import { useState, useTransition, useEffect } from "react";
 import { JobCard } from "@/components/JobCard";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { JobWithEvaluation, JobFilters as JobFiltersType } from "@/types/database";
+import {
+  JobWithEvaluation,
+  JobFilters as JobFiltersType,
+  SortOption,
+} from "@/types/database";
 import { loadMoreJobs, getFilteredJobCount } from "./actions";
 import { JobFilters } from "./JobFilters";
+import { JobSort } from "./JobSort";
 
 interface JobListProps {
   initialJobs: JobWithEvaluation[];
@@ -23,6 +28,7 @@ const EMPTY_FILTERS: JobFiltersType = {
 export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
   const [jobs, setJobs] = useState(initialJobs);
   const [filters, setFilters] = useState<JobFiltersType>(EMPTY_FILTERS);
+  const [sort, setSort] = useState<SortOption>("score_desc");
   const [filteredCount, setFilteredCount] = useState(totalCount);
   const [isPending, startTransition] = useTransition();
   const [isFiltering, setIsFiltering] = useState(false);
@@ -32,10 +38,10 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
     filters.datePosted !== null ||
     filters.statuses.length > 0;
 
-  // Refetch jobs when filters change
+  // Refetch jobs when filters or sort change
   useEffect(() => {
-    if (!hasActiveFilters) {
-      // Reset to initial state when filters cleared
+    // If no filters and default sort, use initial data
+    if (!hasActiveFilters && sort === "score_desc") {
       setJobs(initialJobs);
       setFilteredCount(totalCount);
       return;
@@ -44,7 +50,7 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
     setIsFiltering(true);
     const fetchFiltered = async () => {
       const [newJobs, counts] = await Promise.all([
-        loadMoreJobs(0, pageSize, filters),
+        loadMoreJobs(0, pageSize, filters, sort),
         getFilteredJobCount(filters),
       ]);
       setJobs(newJobs);
@@ -52,15 +58,19 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
       setIsFiltering(false);
     };
     fetchFiltered();
-  }, [filters, initialJobs, totalCount, pageSize, hasActiveFilters]);
+  }, [filters, sort, initialJobs, totalCount, pageSize, hasActiveFilters]);
 
   const hasMore = jobs.length < filteredCount;
 
   const handleLoadMore = () => {
     startTransition(async () => {
-      const newJobs = await loadMoreJobs(jobs.length, pageSize, filters);
+      const newJobs = await loadMoreJobs(jobs.length, pageSize, filters, sort);
       setJobs((prev) => [...prev, ...newJobs]);
     });
+  };
+
+  const handleSortChange = (newSort: SortOption) => {
+    setSort(newSort);
   };
 
   const handleFiltersChange = (newFilters: JobFiltersType) => {
@@ -107,19 +117,18 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
   );
 
   return (
-    <div className="lg:flex lg:gap-6">
-      {/* Filter sidebar on desktop */}
-      <div className="lg:w-56 lg:flex-shrink-0">
+    <div>
+      {/* Filters and Sort row */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <JobFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}
-          filteredCount={filteredCount}
-          totalCount={totalCount}
         />
+        <JobSort value={sort} onChange={handleSortChange} />
       </div>
 
       {/* Job list */}
-      <div className="flex-1 min-w-0">
+      <div>
         {isFiltering ? (
           <div className="flex justify-center py-12">
             <svg
@@ -146,7 +155,7 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
         ) : jobs.length === 0 ? (
           emptyState
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-8">
             {/* Job cards */}
             {jobs.map((evaluation) => (
               <JobCard key={evaluation.id} evaluation={evaluation} />

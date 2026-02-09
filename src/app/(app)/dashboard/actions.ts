@@ -6,6 +6,7 @@ import {
   JobFilters,
   ScoreRange,
   DatePosted,
+  SortOption,
 } from "@/types/database";
 
 // Helper to get score range boundaries
@@ -38,7 +39,8 @@ function getDateFilter(datePosted: DatePosted): Date {
 export async function loadMoreJobs(
   offset: number,
   limit: number,
-  filters?: JobFilters
+  filters?: JobFilters,
+  sort: SortOption = "score_desc"
 ): Promise<JobWithEvaluation[]> {
   const supabase = await createClient();
 
@@ -78,9 +80,22 @@ export async function loadMoreJobs(
     query = query.or(scoreConditions.join(","));
   }
 
-  const { data: evaluations, error } = await query
-    .order("score_total", { ascending: false })
-    .range(offset, offset + limit - 1);
+  // Apply sorting
+  if (sort === "score_desc") {
+    query = query.order("score_total", { ascending: false });
+  } else if (sort === "date_desc" || sort === "date_asc") {
+    // For date sorting, we need to order by the job's posted_at
+    // Since it's a joined table, we use the foreign table syntax
+    query = query.order("posted_at", {
+      ascending: sort === "date_asc",
+      foreignTable: "jobs",
+    });
+  }
+
+  const { data: evaluations, error } = await query.range(
+    offset,
+    offset + limit - 1
+  );
 
   if (error) {
     console.error("Error loading more jobs:", error);
