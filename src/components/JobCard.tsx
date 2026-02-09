@@ -107,6 +107,8 @@ export function JobCard({ evaluation }: JobCardProps) {
   const [isPending, startTransition] = useTransition();
   const [currentStatus, setCurrentStatus] = useState(evaluation.status);
 
+  const applyUrl = job.apply_url || job.url;
+
   const handleStatusChange = (
     e: React.MouseEvent,
     newStatus: EvaluationStatus
@@ -127,6 +129,15 @@ export function JobCard({ evaluation }: JobCardProps) {
         showToast(result.error || "Failed to update status", "error");
       }
     });
+  };
+
+  const handleOpenJob = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (applyUrl) {
+      window.open(applyUrl, "_blank", "noopener,noreferrer");
+    }
   };
 
   const isSaved = currentStatus === "saved";
@@ -222,6 +233,30 @@ export function JobCard({ evaluation }: JobCardProps) {
 
           {/* Quick Actions */}
           <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-2">
+            {/* View Job Button - Opens external URL */}
+            {applyUrl && (
+              <button
+                onClick={handleOpenJob}
+                disabled={isPending}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+                View Job
+              </button>
+            )}
+
             {/* Save Button */}
             <button
               onClick={(e) =>
@@ -254,46 +289,37 @@ export function JobCard({ evaluation }: JobCardProps) {
               {isSaved ? "Saved" : "Save"}
             </button>
 
-            {/* Applied Button */}
-            {!isApplied ? (
-              <button
-                onClick={(e) => handleStatusChange(e, "applied")}
-                disabled={isPending}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors disabled:opacity-50"
+            {/* Apply Button - Marks job as applied */}
+            <button
+              onClick={(e) =>
+                handleStatusChange(e, isApplied ? "viewed" : "applied")
+              }
+              disabled={isPending}
+              className={`
+                inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors
+                ${
+                  isApplied
+                    ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }
+                disabled:opacity-50
+              `}
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Applied
-              </button>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md bg-purple-100 text-purple-700">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Applied
-              </span>
-            )}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Applied
+            </button>
 
             {/* Hide Button */}
             <button
