@@ -155,7 +155,7 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
         ) : jobs.length === 0 ? (
           emptyState
         ) : (
-          <div className="space-y-8">
+          <div className="flex flex-col gap-4">
             {/* Job cards */}
             {jobs.map((evaluation) => (
               <JobCard key={evaluation.id} evaluation={evaluation} />

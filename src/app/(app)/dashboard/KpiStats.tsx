@@ -23,7 +23,7 @@ function StatBox({
 
   return (
     <div
-      className={`rounded-xl px-4 py-3 ${colorClasses[color]}`}
+      className={`rounded-xl px-4 py-3 flex flex-col justify-center ${colorClasses[color]}`}
     >
       <div className="text-2xl font-bold">{value}</div>
       <div className="text-sm opacity-80">{label}</div>
