@@ -1,6 +1,39 @@
-import { Card } from "@/components/ui/Card";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { JobPreferencesForm } from "./JobPreferencesForm";
+import { CVForm } from "./CVForm";
+import { CareerAspirationsForm } from "./CareerAspirationsForm";
 
-export default function ProfilePage() {
+export default async function ProfilePage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Fetch current user preferences, CV, and career aspirations
+  const { data: userData, error } = await supabase
+    .from("users")
+    .select("pref_roles, pref_locations, pref_remote, cv_raw, summary, updated_at")
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching user data:", error);
+  }
+
+  // Default to empty arrays if no data
+  const prefRoles = userData?.pref_roles || [];
+  const prefLocations = userData?.pref_locations || [];
+  const prefRemote = userData?.pref_remote || false;
+  const cvRaw = userData?.cv_raw || null;
+  const summary = userData?.summary || null;
+  const updatedAt = userData?.updated_at || null;
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
@@ -10,31 +43,20 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <Card>
-        <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-slate-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-          </div>
-          <h2 className="text-lg font-medium text-slate-900">
-            Profile Management
-          </h2>
-          <p className="mt-2 text-slate-600 max-w-sm mx-auto">
-            This page will be implemented in Epic 3 (Story 3.1-3.3).
-          </p>
-        </div>
-      </Card>
+      <div className="space-y-6">
+        {/* Story 3.1: Job Preferences */}
+        <JobPreferencesForm
+          initialRoles={prefRoles}
+          initialLocations={prefLocations}
+          initialRemoteOk={prefRemote}
+        />
+
+        {/* Story 3.2: CV Section */}
+        <CVForm initialCvRaw={cvRaw} lastUpdated={updatedAt} />
+
+        {/* Story 3.3: Career Aspirations */}
+        <CareerAspirationsForm initialSummary={summary} />
+      </div>
     </div>
   );
 }
