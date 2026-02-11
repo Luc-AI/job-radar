@@ -14,7 +14,8 @@
       "Bash(npx eslint:*)",
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git push:*)"
     ]
   }
 }
