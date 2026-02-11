@@ -3,7 +3,8 @@
 export type EvaluationStatus = 'new' | 'viewed' | 'saved' | 'applied' | 'hidden';
 
 export interface Job {
-  id: string;
+  uuid_job: string;
+  fingerprint_job: string;
   title: string;
   company: string;
   location: string | null;
@@ -21,17 +22,19 @@ export interface Job {
   company_website: string | null;
   company_logo_url: string | null;
   source: string | null;
-  external_id: string | null;
   posted_at: string | null;
-  scraped_at: string;
-  created_at: string;
-  updated_at: string;
+  scraped_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  uuid_user: string | null;
+  time_bucket: string | null;
+  "external ID": number | null;
 }
 
 export interface Evaluation {
-  id: string;
+  uuid_evaluation: string;
   user_id: string;
-  job_id: string;
+  fingerprint_job: string;
   score_total: number;
   score_role: number | null;
   score_company: number | null;
@@ -44,10 +47,10 @@ export interface Evaluation {
   reason_location: string | null;
   reason_industry: string | null;
   reason_growth: string | null;
-  status: EvaluationStatus;
-  evaluated_at: string;
-  created_at: string;
-  updated_at: string;
+  status: EvaluationStatus | null;
+  evaluated_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 // Combined type for job card display (evaluation joined with job)

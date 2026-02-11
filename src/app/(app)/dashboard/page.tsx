@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { JobWithEvaluation } from "@/types/database";
+import { Job, JobWithEvaluation } from "@/types/database";
 import { JobList } from "./JobList";
 import { KpiStats } from "./KpiStats";
 
@@ -58,25 +58,31 @@ export default async function DashboardPage() {
       .eq("status", "saved"),
   ]);
 
-  // Fetch first page of evaluations with job data
+  // Fetch first page of evaluations
   const { data: evaluations, error } = await supabase
     .from("evaluations")
-    .select(
-      `
-      *,
-      job:jobs(*)
-    `
-    )
+    .select("*")
     .eq("user_id", user.id)
     .neq("status", "hidden")
     .order("score_total", { ascending: false })
     .range(0, PAGE_SIZE - 1);
 
   if (error) {
-    console.error("Error fetching evaluations:", error);
+    console.error("Error fetching evaluations:", error.message, error.code, error.details);
   }
 
-  const jobs = (evaluations as JobWithEvaluation[]) || [];
+  // Fetch jobs by fingerprints
+  const fingerprints = (evaluations || []).map((e) => e.fingerprint_job);
+  const { data: jobsData } = fingerprints.length > 0
+    ? await supabase.from("jobs").select("*").in("fingerprint_job", fingerprints)
+    : { data: [] };
+
+  // Combine evaluations with jobs
+  const jobsMap = new Map((jobsData || []).map((j) => [j.fingerprint_job, j]));
+  const jobs: JobWithEvaluation[] = (evaluations || []).map((e) => ({
+    ...e,
+    job: jobsMap.get(e.fingerprint_job) as Job || null,
+  })) as JobWithEvaluation[];
 
   return (
     <div className="max-w-3xl mx-auto">

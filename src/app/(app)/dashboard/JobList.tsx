@@ -158,7 +158,7 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
           <div className="flex flex-col gap-4">
             {/* Job cards */}
             {jobs.map((evaluation) => (
-              <JobCard key={evaluation.id} evaluation={evaluation} />
+              <JobCard key={evaluation.uuid_evaluation} evaluation={evaluation} />
             ))}
 
             {/* Load More button */}

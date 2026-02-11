@@ -21,7 +21,7 @@ export async function updateJobStatus(
   const { error } = await supabase
     .from("evaluations")
     .update({ status })
-    .eq("id", evaluationId)
+    .eq("uuid_evaluation", evaluationId)
     .eq("user_id", user.id);
 
   if (error) {

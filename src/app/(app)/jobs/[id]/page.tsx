@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
-import { JobWithEvaluation } from "@/types/database";
+import { Evaluation, Job } from "@/types/database";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { JobActions } from "./JobActions";
 
@@ -22,16 +22,11 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     redirect("/login");
   }
 
-  // Fetch evaluation with job data
+  // Fetch evaluation
   const { data: evaluation, error } = await supabase
     .from("evaluations")
-    .select(
-      `
-      *,
-      job:jobs(*)
-    `
-    )
-    .eq("id", id)
+    .select("*")
+    .eq("uuid_evaluation", id)
     .eq("user_id", user.id)
     .single();
 
@@ -39,15 +34,23 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     notFound();
   }
 
-  const jobData = evaluation as JobWithEvaluation;
-  const { job } = jobData;
+  // Fetch job by fingerprint
+  const { data: job } = await supabase
+    .from("jobs")
+    .select("*")
+    .eq("fingerprint_job", evaluation.fingerprint_job)
+    .single();
+
+  if (!job) {
+    notFound();
+  }
 
   // Mark as viewed if currently "new"
-  if (jobData.status === "new") {
+  if (evaluation.status === "new") {
     await supabase
       .from("evaluations")
       .update({ status: "viewed" })
-      .eq("id", id);
+      .eq("uuid_evaluation", id);
   }
 
   // Format salary range
@@ -183,15 +186,15 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
               {/* Score Badge */}
               <div className="flex-shrink-0">
-                <ScoreBadge score={jobData.score_total} size="lg" />
+                <ScoreBadge score={evaluation.score_total} size="lg" />
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="mt-6 pt-6 border-t border-slate-100">
               <JobActions
-                evaluationId={jobData.id}
-                status={jobData.status}
+                evaluationId={evaluation.uuid_evaluation}
+                status={evaluation.status}
                 applyUrl={job.apply_url || job.url}
               />
             </div>
@@ -217,7 +220,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
           {/* AI Match Breakdown - Mobile Only */}
           <div className="lg:hidden">
-            <ScoreBreakdown evaluation={jobData} />
+            <ScoreBreakdown evaluation={evaluation} />
           </div>
         </div>
 
@@ -225,7 +228,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         <div className="space-y-6">
           {/* AI Match Breakdown - Desktop */}
           <div className="hidden lg:block">
-            <ScoreBreakdown evaluation={jobData} />
+            <ScoreBreakdown evaluation={evaluation} />
           </div>
 
           {/* Company Info */}

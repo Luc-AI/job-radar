@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
-import { JobWithEvaluation } from "@/types/database";
+import { Evaluation } from "@/types/database";
 
 interface ScoreBreakdownProps {
-  evaluation: JobWithEvaluation;
+  evaluation: Evaluation;
 }
 
 interface ScoreDimension {

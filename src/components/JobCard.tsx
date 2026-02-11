@@ -120,7 +120,7 @@ export function JobCard({ evaluation }: JobCardProps) {
     setCurrentStatus(newStatus);
 
     startTransition(async () => {
-      const result = await updateJobStatus(evaluation.id, newStatus);
+      const result = await updateJobStatus(evaluation.uuid_evaluation, newStatus);
       if (result.success) {
         showToast(STATUS_MESSAGES[newStatus], "success");
         router.refresh();
@@ -144,7 +144,7 @@ export function JobCard({ evaluation }: JobCardProps) {
   const isApplied = currentStatus === "applied";
 
   return (
-    <Link href={`/jobs/${evaluation.id}`}>
+    <Link href={`/jobs/${evaluation.uuid_evaluation}`}>
       <Card
         padding="none"
         className="hover:shadow-md hover:border-slate-300 transition-all cursor-pointer"

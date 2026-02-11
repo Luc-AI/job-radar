@@ -54,12 +54,7 @@ export async function loadMoreJobs(
 
   let query = supabase
     .from("evaluations")
-    .select(
-      `
-      *,
-      job:jobs(*)
-    `
-    )
+    .select("*")
     .eq("user_id", user.id);
 
   // Apply status filter
@@ -80,16 +75,9 @@ export async function loadMoreJobs(
     query = query.or(scoreConditions.join(","));
   }
 
-  // Apply sorting
+  // Apply sorting (only score sorting works directly on evaluations)
   if (sort === "score_desc") {
     query = query.order("score_total", { ascending: false });
-  } else if (sort === "date_desc" || sort === "date_asc") {
-    // For date sorting, we need to order by the job's posted_at
-    // Since it's a joined table, we use the foreign table syntax
-    query = query.order("posted_at", {
-      ascending: sort === "date_asc",
-      foreignTable: "jobs",
-    });
   }
 
   const { data: evaluations, error } = await query.range(
@@ -102,7 +90,18 @@ export async function loadMoreJobs(
     return [];
   }
 
-  let results = (evaluations as JobWithEvaluation[]) || [];
+  // Fetch jobs by fingerprints
+  const fingerprints = (evaluations || []).map((e) => e.fingerprint_job);
+  const { data: jobsData } = fingerprints.length > 0
+    ? await supabase.from("jobs").select("*").in("fingerprint_job", fingerprints)
+    : { data: [] };
+
+  // Combine evaluations with jobs
+  const jobsMap = new Map((jobsData || []).map((j) => [j.fingerprint_job, j]));
+  let results: JobWithEvaluation[] = (evaluations || []).map((e) => ({
+    ...e,
+    job: jobsMap.get(e.fingerprint_job) || null,
+  })) as JobWithEvaluation[];
 
   // Apply date filter (client-side since it's on joined table)
   if (filters?.datePosted) {
@@ -110,6 +109,15 @@ export async function loadMoreJobs(
     results = results.filter((evaluation) => {
       if (!evaluation.job?.posted_at) return true;
       return new Date(evaluation.job.posted_at) >= dateThreshold;
+    });
+  }
+
+  // Apply date sorting (client-side)
+  if (sort === "date_desc" || sort === "date_asc") {
+    results.sort((a, b) => {
+      const dateA = a.job?.posted_at ? new Date(a.job.posted_at).getTime() : 0;
+      const dateB = b.job?.posted_at ? new Date(b.job.posted_at).getTime() : 0;
+      return sort === "date_asc" ? dateA - dateB : dateB - dateA;
     });
   }
 
@@ -149,14 +157,7 @@ export async function getFilteredJobCount(
   // Build filtered query
   let query = supabase
     .from("evaluations")
-    .select(
-      `
-      id,
-      score_total,
-      status,
-      job:jobs(posted_at)
-    `
-    )
+    .select("uuid_evaluation, score_total, status, fingerprint_job")
     .eq("user_id", user.id);
 
   // Apply status filter
@@ -184,13 +185,19 @@ export async function getFilteredJobCount(
 
   let filteredResults = data || [];
 
-  // Apply date filter
-  if (filters?.datePosted) {
+  // Apply date filter (need to fetch jobs if date filter is active)
+  if (filters?.datePosted && filteredResults.length > 0) {
+    const fingerprints = filteredResults.map((e) => e.fingerprint_job);
+    const { data: jobsData } = await supabase
+      .from("jobs")
+      .select("fingerprint_job, posted_at")
+      .in("fingerprint_job", fingerprints);
+
+    const jobsMap = new Map((jobsData || []).map((j) => [j.fingerprint_job, j.posted_at]));
     const dateThreshold = getDateFilter(filters.datePosted);
+
     filteredResults = filteredResults.filter((evaluation) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const job = evaluation.job as any;
-      const postedAt = job?.posted_at;
+      const postedAt = jobsMap.get(evaluation.fingerprint_job);
       if (!postedAt) return true;
       return new Date(postedAt) >= dateThreshold;
     });
