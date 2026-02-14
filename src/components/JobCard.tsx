@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { JobWithEvaluation, EvaluationStatus } from "@/types/database";
 import { useToast } from "@/components/ui/Toast";
 import { updateJobStatus } from "@/app/(app)/jobs/[id]/actions";
+import { CompanyLogo } from "@/components/CompanyLogo";
 
 interface JobCardProps {
   evaluation: JobWithEvaluation;
@@ -150,24 +151,31 @@ export function JobCard({ evaluation }: JobCardProps) {
         className="hover:shadow-md hover:border-slate-300 transition-all cursor-pointer"
       >
         <div className="p-4 sm:p-5">
-          {/* Header: Title, Score, Status */}
+          {/* Header: Logo, Title, Score, Status */}
           <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-semibold text-slate-900 truncate">
-                  {job.title}
-                </h3>
-                {currentStatus === "new" && (
-                  <StatusChip status={currentStatus} />
-                )}
-                {currentStatus === "saved" && (
-                  <StatusChip status={currentStatus} />
-                )}
-                {currentStatus === "applied" && (
-                  <StatusChip status={currentStatus} />
-                )}
+            <div className="flex items-end gap-3 flex-1 min-w-0">
+              <CompanyLogo
+                logoUrl={job.company_logo_url}
+                companyName={job.company}
+                size="md"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base font-semibold text-slate-900 truncate">
+                    {job.title}
+                  </h3>
+                  {currentStatus === "new" && (
+                    <StatusChip status={currentStatus} />
+                  )}
+                  {currentStatus === "saved" && (
+                    <StatusChip status={currentStatus} />
+                  )}
+                  {currentStatus === "applied" && (
+                    <StatusChip status={currentStatus} />
+                  )}
+                </div>
+                <p className="mt-0.5 text-sm text-slate-600">{job.company}</p>
               </div>
-              <p className="mt-0.5 text-sm text-slate-600">{job.company}</p>
             </div>
             <ScoreBadge score={evaluation.score_total} />
           </div>

@@ -12,6 +12,11 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/tests/.auth/
+!/tests/.auth/.gitkeep
 
 # next.js
 /.next/

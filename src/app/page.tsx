@@ -213,14 +213,11 @@ function Footer() {
             <span className="font-semibold text-white">Job Radar</span>
           </div>
           <div className="flex items-center gap-6 text-sm">
-            <Link href="/about" className="hover:text-white transition-colors">
-              About
-            </Link>
             <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy
             </Link>
-            <Link href="/contact" className="hover:text-white transition-colors">
-              Contact
+            <Link href="/terms" className="hover:text-white transition-colors">
+              Terms
             </Link>
           </div>
         </div>

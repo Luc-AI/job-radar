@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Evaluation, Job } from "@/types/database";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { JobActions } from "./JobActions";
+import { CompanyLogo } from "@/components/CompanyLogo";
 
 interface JobDetailPageProps {
   params: Promise<{ id: string }>;
@@ -102,11 +103,17 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           {/* Job Header Card */}
           <Card>
             <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <h1 className="text-xl font-semibold text-slate-900">
-                  {job.title}
-                </h1>
-                <p className="mt-1 text-lg text-slate-600">{job.company}</p>
+              <div className="flex items-start gap-4 flex-1 min-w-0">
+                <CompanyLogo
+                  logoUrl={job.company_logo_url}
+                  companyName={job.company}
+                  size="lg"
+                />
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl font-semibold text-slate-900">
+                    {job.title}
+                  </h1>
+                  <p className="mt-1 text-lg text-slate-600">{job.company}</p>
 
                 {/* Meta info */}
                 <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
@@ -182,6 +189,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
                     {salary}
                   </div>
                 )}
+                </div>
               </div>
 
               {/* Score Badge */}
@@ -236,21 +244,24 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
               Company Info
             </h2>
-            <div className="space-y-3">
+            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100">
+              <CompanyLogo
+                logoUrl={job.company_logo_url}
+                companyName={job.company}
+                size="md"
+              />
               <div>
-                <dt className="text-sm text-slate-500">Company</dt>
-                <dd className="text-sm font-medium text-slate-900">
+                <div className="text-sm font-medium text-slate-900">
                   {job.company}
-                </dd>
-              </div>
-              {job.company_industry && (
-                <div>
-                  <dt className="text-sm text-slate-500">Industry</dt>
-                  <dd className="text-sm font-medium text-slate-900">
-                    {job.company_industry}
-                  </dd>
                 </div>
-              )}
+                {job.company_industry && (
+                  <div className="text-xs text-slate-500">
+                    {job.company_industry}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="space-y-3">
               {job.company_size && (
                 <div>
                   <dt className="text-sm text-slate-500">Company Size</dt>
