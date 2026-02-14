@@ -145,7 +145,7 @@ export function JobCard({ evaluation }: JobCardProps) {
   const isApplied = currentStatus === "applied";
 
   return (
-    <Link href={`/jobs/${evaluation.uuid_evaluation}`}>
+    <Link href={`/jobs/${evaluation.uuid_evaluation}`} data-testid="job-card">
       <Card
         padding="none"
         className="hover:shadow-md hover:border-slate-300 transition-all cursor-pointer"
