@@ -20,14 +20,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+      "inline-flex items-center justify-center font-medium rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
     const variants = {
       primary:
-        "bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-500",
+        "bg-terracotta text-cream hover:bg-terracotta-dark focus:ring-terracotta/50",
       secondary:
-        "bg-slate-100 text-slate-900 hover:bg-slate-200 focus:ring-slate-500",
-      ghost: "text-slate-600 hover:bg-slate-100 focus:ring-slate-500",
+        "bg-beige text-walnut hover:bg-sand focus:ring-sand",
+      ghost: "text-charcoal hover:bg-beige focus:ring-sand",
       danger:
         "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
     };

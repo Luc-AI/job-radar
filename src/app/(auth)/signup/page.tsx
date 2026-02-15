@@ -59,10 +59,10 @@ export default function SignupPage() {
   return (
     <Card>
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">
+        <h1 className="text-2xl font-semibold text-walnut font-serif">
           Create your account
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-charcoal">
           Start getting AI-matched job opportunities
         </p>
       </div>
@@ -123,10 +123,10 @@ export default function SignupPage() {
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-200" />
+          <div className="w-full border-t border-sand" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-slate-500">or</span>
+          <span className="px-2 bg-cream text-charcoal/60">or</span>
         </div>
       </div>
 
@@ -155,11 +155,11 @@ export default function SignupPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-charcoal">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium text-slate-900 hover:underline"
+          className="font-medium text-terracotta hover:underline"
         >
           Sign in
         </Link>
