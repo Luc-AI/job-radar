@@ -25,14 +25,22 @@ setup("authenticate", async ({ page }) => {
     );
   }
 
-  // Fill login form
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  // Fill login form (labels are "Email address" and "Password")
+  await page.getByRole("textbox", { name: "Email address" }).fill(email);
+  await page.getByRole("textbox", { name: "Password" }).fill(password);
 
   // Submit login
-  await page.getByRole("button", { name: /sign in|log in/i }).click();
+  await page.getByRole("button", { name: /sign in/i }).click();
 
-  // Wait for successful redirect to dashboard
+  // Wait for post-login navigation (may go to onboarding or dashboard)
+  await page.waitForLoadState("networkidle");
+
+  // If redirected to onboarding, complete or skip to dashboard
+  if (page.url().includes("/onboarding")) {
+    await page.goto("/dashboard");
+  }
+
+  // Wait for dashboard
   await expect(page).toHaveURL(/.*dashboard/, { timeout: 30000 });
 
   // Verify we're logged in by checking for the main dashboard heading

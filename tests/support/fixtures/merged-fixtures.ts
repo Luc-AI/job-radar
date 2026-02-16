@@ -125,3 +125,60 @@ export const test = base.extend<CustomFixtures>({
 });
 
 export { expect };
+
+/**
+ * Shared helper to ensure page is authenticated.
+ * Re-authenticates if storage state wasn't applied (fallback for flaky CI).
+ */
+export async function ensureAuthenticated(page: Page, targetUrl: string) {
+  await page.goto(targetUrl);
+
+  // Wait for any redirects to complete
+  await page.waitForLoadState("networkidle").catch(() => {});
+  await page.waitForTimeout(1000); // Allow time for client-side auth checks
+
+  // Check if on login page or showing login form
+  const currentUrl = page.url();
+  const loginForm = page.getByRole("textbox", { name: "Email address" });
+  const isOnLoginPage =
+    currentUrl.includes("/login") ||
+    (await loginForm.isVisible({ timeout: 5000 }).catch(() => false));
+
+  if (isOnLoginPage) {
+    const email = process.env.TEST_USER_EMAIL;
+    const password = process.env.TEST_USER_PASSWORD;
+
+    if (!email || !password) {
+      throw new Error("TEST_USER_EMAIL and TEST_USER_PASSWORD must be set");
+    }
+
+    // Fill login form
+    await loginForm.fill(email);
+    await page.getByRole("textbox", { name: "Password" }).fill(password);
+
+    // Click sign in and wait for navigation
+    const signInButton = page.getByRole("button", { name: /sign in/i });
+    await Promise.all([
+      page.waitForURL(/.*(?:dashboard|onboarding|profile|settings).*/, { timeout: 30000 }).catch(() => null),
+      signInButton.click(),
+    ]);
+
+    await page.waitForLoadState("networkidle");
+
+    // Handle onboarding redirect
+    if (page.url().includes("/onboarding")) {
+      await page.goto(targetUrl);
+      await page.waitForLoadState("networkidle");
+    }
+
+    // Navigate to target if not already there
+    const targetPath = targetUrl.replace(/^\//, "");
+    if (!page.url().includes(targetPath)) {
+      await page.goto(targetUrl);
+      await page.waitForLoadState("networkidle");
+    }
+  }
+
+  // Final wait for content
+  await page.waitForLoadState("networkidle").catch(() => {});
+}

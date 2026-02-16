@@ -6,32 +6,7 @@
  *
  * Pattern: Given/When/Then format with data-testid selectors
  */
-import { test, expect, Page } from "../support/fixtures/merged-fixtures";
-
-/**
- * Helper to ensure page is authenticated.
- * Re-authenticates if storage state wasn't applied.
- */
-async function ensureAuthenticated(page: Page, targetUrl: string) {
-  await page.goto(targetUrl);
-
-  // Wait for navigation to settle
-  await page.waitForLoadState("networkidle").catch(() => {});
-
-  // Check if we're on login page
-  const url = page.url();
-  if (url.includes("/login")) {
-    const email = process.env.TEST_USER_EMAIL;
-    const password = process.env.TEST_USER_PASSWORD;
-
-    if (email && password) {
-      await page.getByLabel("Email").fill(email);
-      await page.getByLabel("Password").fill(password);
-      await page.getByRole("button", { name: /sign in/i }).click();
-      await page.waitForURL(/.*dashboard|.*profile|.*settings/, { timeout: 30000 });
-    }
-  }
-}
+import { test, expect, ensureAuthenticated } from "../support/fixtures/merged-fixtures";
 
 test.describe("Job Dashboard", () => {
   test.beforeEach(async ({ page }) => {
@@ -101,7 +76,7 @@ test.describe("Job Dashboard", () => {
     // Then: Sidebar navigation links are present (on desktop viewport)
     // At least one of these links should be visible
     const jobsLink = page.getByRole("link", { name: "Jobs" });
-    const profileLink = page.getByRole("link", { name: "Profile" });
+    const profileLink = page.getByRole("link", { name: "Profile", exact: true });
 
     // Check at least one nav link is visible
     const hasJobsLink = await jobsLink.isVisible().catch(() => false);
@@ -115,7 +90,7 @@ test.describe("Job Dashboard", () => {
     await page.waitForLoadState("networkidle");
 
     // When: User clicks profile link (or navigates directly)
-    const profileLink = page.getByRole("link", { name: "Profile" });
+    const profileLink = page.getByRole("link", { name: "Profile", exact: true });
     if (await profileLink.isVisible()) {
       await profileLink.click();
       await expect(page).toHaveURL(/.*profile/);
@@ -156,16 +131,9 @@ test.describe("Job Card Interactions", () => {
       return;
     }
 
-    // When: User clicks on job card or view button
-    const viewButton = jobCard.locator(
-      'button:has-text("View"), a:has-text("View"), [data-testid="view-job"]'
-    );
-
-    if (await viewButton.isVisible()) {
-      await viewButton.click();
-    } else {
-      await jobCard.click();
-    }
+    // When: User clicks on job card (the card itself is a link to job details)
+    // Note: "View Job" button opens external link in new tab, so click card directly
+    await jobCard.click();
 
     // Then: User sees job detail page
     await expect(page).toHaveURL(/.*jobs\/[^/]+/);
@@ -181,45 +149,39 @@ test.describe("Job Card Interactions", () => {
       return;
     }
 
-    // When: User clicks save button
-    const saveButton = jobCard.locator(
-      'button:has-text("Save"), [data-testid="save-job"]'
-    );
+    // When: User clicks save button (skip if already saved)
+    const saveButton = jobCard.getByRole("button", { name: "Save" });
 
     if (await saveButton.isVisible()) {
       await saveButton.click();
 
-      // Then: Job is saved (button state changes or toast appears)
-      await expect(
-        page.locator('text=/saved|success/i').or(saveButton.locator('text=/unsave|saved/i'))
-      ).toBeVisible({ timeout: 5000 });
+      // Then: Button changes to "Saved" state within this card
+      await expect(jobCard.getByRole("button", { name: "Saved" })).toBeVisible({
+        timeout: 5000,
+      });
     }
   });
 
   test("can hide a job", async ({ page }) => {
     // Given: Dashboard has at least one job
     await page.waitForTimeout(1000);
-    const jobCard = page.locator('[data-testid="job-card"]').first();
+    const jobCards = page.locator('[data-testid="job-card"]');
+    const initialCount = await jobCards.count();
 
-    if (!(await jobCard.isVisible({ timeout: 5000 }).catch(() => false))) {
+    if (initialCount === 0) {
       test.skip();
       return;
     }
 
-    // When: User clicks hide button
-    const hideButton = jobCard.locator(
-      'button:has-text("Hide"), [data-testid="hide-job"]'
-    );
+    // When: User clicks hide button on first card
+    const firstCard = jobCards.first();
+    const hideButton = firstCard.getByRole("button", { name: "Hide" });
 
     if (await hideButton.isVisible()) {
       await hideButton.click();
 
-      // Then: Job is hidden (removed from list or toast appears)
-      await expect(
-        page
-          .locator('text=/hidden|removed/i')
-          .or(page.locator('[data-testid="job-card"]'))
-      ).toBeVisible({ timeout: 5000 });
+      // Then: Job count decreases (card was hidden)
+      await expect(jobCards).toHaveCount(initialCount - 1, { timeout: 5000 });
     }
   });
 });

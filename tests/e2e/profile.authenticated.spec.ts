@@ -6,33 +6,7 @@
  *
  * Pattern: Given/When/Then format with data-testid selectors
  */
-import { test, expect, Page } from "../support/fixtures/merged-fixtures";
-
-/**
- * Helper to ensure page is authenticated.
- * Re-authenticates if storage state wasn't applied.
- */
-async function ensureAuthenticated(page: Page, targetUrl: string) {
-  await page.goto(targetUrl);
-  await page.waitForLoadState("networkidle").catch(() => {});
-
-  const url = page.url();
-  if (url.includes("/login")) {
-    const email = process.env.TEST_USER_EMAIL;
-    const password = process.env.TEST_USER_PASSWORD;
-
-    if (email && password) {
-      await page.getByLabel("Email").fill(email);
-      await page.getByLabel("Password").fill(password);
-      await page.getByRole("button", { name: /sign in/i }).click();
-      await page.waitForURL(/.*dashboard|.*profile|.*settings/, { timeout: 30000 });
-      // Navigate to the original target after auth
-      if (!page.url().includes(targetUrl.replace("/", ""))) {
-        await page.goto(targetUrl);
-      }
-    }
-  }
-}
+import { test, expect, ensureAuthenticated } from "../support/fixtures/merged-fixtures";
 
 test.describe("Profile Page", () => {
   test.beforeEach(async ({ page }) => {

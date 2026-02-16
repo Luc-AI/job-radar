@@ -90,7 +90,9 @@ export default defineConfig({
     {
       name: "authenticated",
       dependencies: ["seed"],
-      // Limit parallelism for authenticated tests to avoid race conditions
+      // NOTE: Run with --workers=1 to avoid race conditions with shared auth state
+      // Tests within a file run sequentially, but different files can run in parallel
+      // which causes flaky failures when multiple files access the same storage state
       fullyParallel: false,
       use: {
         ...devices["Desktop Chrome"],
