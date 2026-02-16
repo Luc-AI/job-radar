@@ -2,7 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const origin = forwardedHost
+    ? `https://${forwardedHost}`
+    : new URL(request.url).origin;
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/onboarding/step-1";
 
@@ -30,16 +34,7 @@ export async function GET(request: Request) {
       }
 
       // New user or onboarding not completed - go to onboarding
-      const forwardedHost = request.headers.get("x-forwarded-host");
-      const isLocalEnv = process.env.NODE_ENV === "development";
-
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
-      } else {
-        return NextResponse.redirect(`${origin}${next}`);
-      }
+      return NextResponse.redirect(`${origin}${next}`);
     }
   }
 
