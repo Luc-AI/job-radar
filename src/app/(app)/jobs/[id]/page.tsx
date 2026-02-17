@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import { Evaluation, Job } from "@/types/database";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { JobActions } from "./JobActions";

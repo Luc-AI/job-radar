@@ -1,11 +1,19 @@
 "use client";
 
 import { useActionState, useState, useEffect, useRef } from "react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
-import { useToast } from "@/components/ui/Toast";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { updateEmail, deleteAccount, AccountSettingsState } from "./actions";
 
 interface AccountSettingsFormProps {
@@ -21,7 +29,6 @@ function EmailEditForm({
   currentEmail: string;
   onCancel: () => void;
 }) {
-  const { showToast } = useToast();
   const [newEmail, setNewEmail] = useState("");
   const [emailState, emailAction, emailPending] = useActionState(
     updateEmail,
@@ -32,32 +39,37 @@ function EmailEditForm({
 
   useEffect(() => {
     if (emailState.success && !prevStateRef.current.success) {
-      showToast(emailState.message || "Email updated", "success");
+      toast.success(emailState.message || "Email updated");
       onCancel();
     }
     if (emailState.error && emailState.error !== prevStateRef.current.error) {
-      showToast(emailState.error, "error");
+      toast.error(emailState.error);
     }
     prevStateRef.current = emailState;
-  }, [emailState, showToast, onCancel]);
+  }, [emailState, onCancel]);
 
   return (
     <form action={emailAction} className="space-y-3">
-      <p className="text-sm text-slate-500 mb-2">
+      <p className="text-sm text-muted-foreground mb-2">
         Current email: {currentEmail}
       </p>
-      <Input
-        type="email"
-        name="email"
-        value={newEmail}
-        onChange={(e) => setNewEmail(e.target.value)}
-        placeholder="Enter new email address"
-        error={emailState.error}
-      />
+      <div className="space-y-2">
+        <Input
+          type="email"
+          name="email"
+          value={newEmail}
+          onChange={(e) => setNewEmail(e.target.value)}
+          placeholder="Enter new email address"
+          aria-invalid={!!emailState.error}
+        />
+        {emailState.error && (
+          <p className="text-sm text-destructive">{emailState.error}</p>
+        )}
+      </div>
       <div className="flex gap-2">
         <Button
           type="button"
-          variant="secondary"
+          variant="outline"
           size="sm"
           onClick={onCancel}
         >
@@ -66,10 +78,16 @@ function EmailEditForm({
         <Button
           type="submit"
           size="sm"
-          isLoading={emailPending}
-          disabled={!newEmail}
+          disabled={emailPending || !newEmail}
         >
-          Update Email
+          {emailPending ? (
+            <>
+              <Loader2 className="animate-spin" />
+              Updating...
+            </>
+          ) : (
+            "Update Email"
+          )}
         </Button>
       </div>
     </form>
@@ -77,8 +95,6 @@ function EmailEditForm({
 }
 
 export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
-  const { showToast } = useToast();
-
   // Email change state
   const [isEditingEmail, setIsEditingEmail] = useState(false);
 
@@ -97,10 +113,10 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
   // Handle delete error (success redirects, so no success handling needed)
   useEffect(() => {
     if (deleteState.error && deleteState.error !== prevDeleteStateRef.current.error) {
-      showToast(deleteState.error, "error");
+      toast.error(deleteState.error);
     }
     prevDeleteStateRef.current = deleteState;
-  }, [deleteState, showToast]);
+  }, [deleteState]);
 
   const handleOpenDeleteModal = () => {
     setIsDeleteModalOpen(true);
@@ -115,110 +131,119 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
   return (
     <>
       <Card>
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-slate-900">Account Settings</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Manage your email and account.
-          </p>
-        </div>
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+          <CardDescription>Manage your email and account.</CardDescription>
+        </CardHeader>
 
-        {/* Email Section */}
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Email address
-            </label>
-            {!isEditingEmail ? (
-              <div className="flex items-center gap-3">
-                <div className="flex-1 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600">
-                  {email}
+        <CardContent>
+          {/* Email Section */}
+          <div className="space-y-4">
+            <div>
+              <Label className="mb-1 block">Email address</Label>
+              {!isEditingEmail ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 px-3 py-2 rounded-lg border bg-muted text-muted-foreground">
+                    {email}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditingEmail(true)}
+                  >
+                    Change
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setIsEditingEmail(true)}
-                >
-                  Change
-                </Button>
-              </div>
-            ) : (
-              <EmailEditForm
-                currentEmail={email}
-                onCancel={() => setIsEditingEmail(false)}
-              />
-            )}
+              ) : (
+                <EmailEditForm
+                  currentEmail={email}
+                  onCancel={() => setIsEditingEmail(false)}
+                />
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Danger Zone */}
-        <div className="mt-8 pt-6 border-t border-slate-200">
-          <h3 className="text-sm font-medium text-red-600 mb-2">Danger Zone</h3>
-          <p className="text-sm text-slate-600 mb-4">
-            Once you delete your account, there is no going back. All your data will be permanently removed.
-          </p>
-          <Button
-            type="button"
-            variant="danger"
-            onClick={handleOpenDeleteModal}
-          >
-            Delete Account
-          </Button>
-        </div>
+          {/* Danger Zone */}
+          <div className="mt-8 pt-6 border-t">
+            <h3 className="text-sm font-medium text-destructive mb-2">Danger Zone</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Once you delete your account, there is no going back. All your data will be permanently removed.
+            </p>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleOpenDeleteModal}
+            >
+              Delete Account
+            </Button>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onClose={handleCloseDeleteModal}
-        title="Delete Account"
-      >
-        <div className="space-y-4">
-          <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-            <p className="text-sm text-red-700">
-              This action is permanent and cannot be undone. All your data, including your profile, job evaluations, and preferences will be deleted.
-            </p>
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Account</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+              <p className="text-sm text-destructive">
+                This action is permanent and cannot be undone. All your data, including your profile, job evaluations, and preferences will be deleted.
+              </p>
+            </div>
+
+            <form action={deleteAction} className="space-y-4">
+              <div className="space-y-2">
+                <Label>
+                  Type <span className="font-mono font-bold">DELETE</span> to confirm
+                </Label>
+                <Input
+                  type="text"
+                  name="confirmation"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder="DELETE"
+                  autoComplete="off"
+                />
+              </div>
+
+              {deleteState.error && (
+                <p className="text-sm text-destructive">{deleteState.error}</p>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseDeleteModal}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  disabled={deletePending || deleteConfirmation !== "DELETE"}
+                >
+                  {deletePending ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete My Account"
+                  )}
+                </Button>
+              </div>
+            </form>
           </div>
-
-          <form action={deleteAction} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Type <span className="font-mono font-bold">DELETE</span> to confirm
-              </label>
-              <Input
-                type="text"
-                name="confirmation"
-                value={deleteConfirmation}
-                onChange={(e) => setDeleteConfirmation(e.target.value)}
-                placeholder="DELETE"
-                autoComplete="off"
-              />
-            </div>
-
-            {deleteState.error && (
-              <p className="text-sm text-red-600">{deleteState.error}</p>
-            )}
-
-            <div className="flex justify-end gap-3">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleCloseDeleteModal}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="danger"
-                isLoading={deletePending}
-                disabled={deleteConfirmation !== "DELETE"}
-              >
-                Delete My Account
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -1,11 +1,13 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { TagInput } from "@/components/ui/TagInput";
 import { LocationInput } from "@/components/ui/LocationInput";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { saveJobPreferences, OnboardingState } from "../actions";
 
 const initialState: OnboardingState = {};
@@ -24,35 +26,34 @@ export default function OnboardingStep1Page() {
     <div className="max-w-2xl mx-auto">
       {/* Progress indicator */}
       <div className="mb-8">
-        <div className="flex items-center justify-between text-sm text-slate-600 mb-2">
+        <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
           <span>Step 1 of 3</span>
           <span>Job Preferences</span>
         </div>
-        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-secondary rounded-full overflow-hidden">
           <div
-            className="h-full bg-slate-900 rounded-full transition-all"
+            className="h-full bg-primary rounded-full transition-all"
             style={{ width: "33%" }}
           />
         </div>
       </div>
 
       <Card>
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-slate-900">
-            What jobs are you looking for?
-          </h1>
-          <p className="mt-2 text-slate-600">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">What jobs are you looking for?</CardTitle>
+          <CardDescription>
             Tell us about your ideal role so we can find the best matches.
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
 
-        {state.error && (
-          <div className="mb-6 p-3 rounded-lg bg-red-50 border border-red-200">
-            <p className="text-sm text-red-600">{state.error}</p>
-          </div>
-        )}
+        <CardContent>
+          {state.error && (
+            <div className="mb-6 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+              <p className="text-sm text-destructive">{state.error}</p>
+            </div>
+          )}
 
-        <form action={formAction} className="space-y-6">
+          <form action={formAction} className="space-y-6">
           {/* Hidden fields for form data */}
           <input type="hidden" name="roles" value={JSON.stringify(roles)} />
           <input
@@ -76,7 +77,7 @@ export default function OnboardingStep1Page() {
               error={state.fieldErrors?.roles}
               maxTags={10}
             />
-            <p className="mt-1.5 text-xs text-slate-500">
+            <p className="mt-1.5 text-xs text-muted-foreground">
               Add titles or keywords that describe the roles you&apos;re
               interested in. Press Enter after each one.
             </p>
@@ -92,29 +93,44 @@ export default function OnboardingStep1Page() {
               error={state.fieldErrors?.locations}
               maxLocations={5}
             />
-            <p className="mt-1.5 text-xs text-slate-500">
+            <p className="mt-1.5 text-xs text-muted-foreground">
               Add the cities or countries where you&apos;d like to work. You can
               type custom locations or select from suggestions.
             </p>
           </div>
 
           {/* Remote preference */}
-          <div className="pt-2">
+          <div className="flex items-center space-x-3 pt-2">
             <Checkbox
-              label="Open to remote work"
-              description="Include fully remote positions in my matches"
+              id="remote-ok"
               checked={remoteOk}
-              onChange={(e) => setRemoteOk(e.target.checked)}
+              onCheckedChange={(checked) => setRemoteOk(checked === true)}
             />
+            <div className="grid gap-1.5 leading-none">
+              <Label htmlFor="remote-ok" className="cursor-pointer">
+                Open to remote work
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Include fully remote positions in my matches
+              </p>
+            </div>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end pt-6 border-t border-slate-200">
-            <Button type="submit" size="lg" isLoading={pending}>
-              Next
+          <div className="flex justify-end pt-6 border-t">
+            <Button type="submit" size="lg" disabled={pending}>
+              {pending ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Next"
+              )}
             </Button>
           </div>
-        </form>
+          </form>
+        </CardContent>
       </Card>
     </div>
   );

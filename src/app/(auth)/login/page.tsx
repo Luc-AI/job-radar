@@ -3,10 +3,13 @@
 import { useState, useActionState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { login, type AuthState } from "../actions";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/client";
 
 const initialState: AuthState = {};
@@ -66,109 +69,112 @@ function LoginForm() {
   };
 
   return (
-    <Card>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-semibold text-walnut font-serif">Welcome back</h1>
-        <p className="mt-2 text-sm text-charcoal">
-          Sign in to check your job matches
-        </p>
-      </div>
+    <Card className="w-full max-w-md">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-serif text-walnut">Welcome back</CardTitle>
+        <CardDescription>Sign in to check your job matches</CardDescription>
+      </CardHeader>
 
-      {(state.error || oauthError) && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 mb-4">
-          <p className="text-sm text-red-600">{state.error || oauthError}</p>
-        </div>
-      )}
-
-      <Button
-        type="button"
-        variant="secondary"
-        className="w-full mb-4"
-        size="lg"
-        onClick={handleGoogleLogin}
-        disabled={googleLoading}
-      >
-        {googleLoading ? (
-          <>
-            <svg
-              className="animate-spin -ml-1 mr-2 h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-            Connecting...
-          </>
-        ) : (
-          <>
-            <GoogleIcon />
-            <span className="ml-2">Continue with Google</span>
-          </>
+      <CardContent className="space-y-6">
+        {(state.error || oauthError) && (
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-sm text-destructive">{state.error || oauthError}</p>
+          </div>
         )}
-      </Button>
 
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-sand" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-cream text-charcoal/60">or</span>
-        </div>
-      </div>
-
-      <form action={formAction} className="space-y-4">
-        <Input
-          label="Email address"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          placeholder="you@example.com"
-        />
-
-        <Input
-          label="Password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          placeholder="Enter your password"
-        />
-
-        <Button type="submit" className="w-full" size="lg" isLoading={pending}>
-          Sign in
-        </Button>
-      </form>
-
-      <p className="mt-6 text-center text-sm text-charcoal">
-        Don&apos;t have an account?{" "}
-        <Link
-          href="/signup"
-          className="font-medium text-terracotta hover:underline"
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          size="lg"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading}
         >
-          Create one
-        </Link>
-      </p>
+          {googleLoading ? (
+            <>
+              <Loader2 className="animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            <>
+              <GoogleIcon />
+              Continue with Google
+            </>
+          )}
+        </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <Separator className="w-full" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">or</span>
+          </div>
+        </div>
+
+        <form action={formAction} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email address</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+
+          <div className="text-right">
+            <Link
+              href="/forgot-password"
+              className="text-sm text-muted-foreground hover:text-primary hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          <Button type="submit" className="w-full" size="lg" disabled={pending}>
+            {pending ? (
+              <>
+                <Loader2 className="animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              "Sign in"
+            )}
+          </Button>
+        </form>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-primary hover:underline"
+          >
+            Create one
+          </Link>
+        </p>
+      </CardContent>
     </Card>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<Card><div className="animate-pulse h-96" /></Card>}>
+    <Suspense fallback={<Card className="w-full max-w-md"><CardContent><div className="animate-pulse h-96" /></CardContent></Card>}>
       <LoginForm />
     </Suspense>
   );

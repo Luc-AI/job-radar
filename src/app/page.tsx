@@ -2,7 +2,13 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { Accordion } from "@/components/ui/Accordion";
+import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // ============================================================================
 // Navigation
@@ -22,19 +28,13 @@ function LandingHeader() {
               <span className="text-charcoal/60 hover:text-charcoal cursor-pointer transition-colors">DE</span>
             </div>
 
-            <Link
-              href="/login"
-              className="text-charcoal hover:text-walnut transition-colors text-sm font-medium"
-            >
-              Log in
-            </Link>
+            <Button variant="ghost" asChild>
+              <Link href="/login">Log in</Link>
+            </Button>
 
-            <Link
-              href="/signup"
-              className="hidden sm:inline-flex bg-terracotta text-cream px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-terracotta-dark transition-colors"
-            >
-              Get Started
-            </Link>
+            <Button asChild className="hidden sm:inline-flex">
+              <Link href="/signup">Get Started</Link>
+            </Button>
           </div>
         </div>
       </nav>
@@ -51,19 +51,16 @@ function HeroSection() {
       <div className="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-walnut leading-tight">
           Stop scrolling job boards.<br />
-          <span className="text-terracotta">We&apos;ll find the good ones for you.</span>
+          <span className="text-primary">We&apos;ll find the good ones for you.</span>
         </h1>
         <p className="mt-8 text-lg sm:text-xl text-charcoal leading-relaxed max-w-2xl mx-auto">
           Upload your CV once. Our AI scans thousands of jobs daily and sends you only the ones that actually fit — scored, ranked, and delivered to your inbox.
         </p>
         <div className="mt-12">
-          <Link
-            href="/signup"
-            className="inline-flex bg-terracotta text-cream px-8 py-4 rounded-xl text-lg font-medium hover:bg-terracotta-dark transition-colors"
-          >
-            Get Your First Matches Free
-          </Link>
-          <p className="mt-4 text-sm text-charcoal/60">
+          <Button size="lg" asChild className="text-lg px-8 py-6 h-auto">
+            <Link href="/signup">Get Your First Matches Free</Link>
+          </Button>
+          <p className="mt-4 text-sm text-muted-foreground">
             Takes 3 minutes to set up. No credit card needed.
           </p>
         </div>
@@ -98,13 +95,13 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 sm:py-28 bg-beige">
+    <section id="how-it-works" className="py-20 sm:py-28 bg-secondary">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="font-serif text-3xl sm:text-4xl text-walnut">
             How It Works
           </h2>
-          <p className="mt-4 text-charcoal/80 max-w-xl mx-auto">
+          <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
             Set it up once, then let us handle the rest.
           </p>
         </div>
@@ -112,8 +109,8 @@ function HowItWorksSection() {
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
           {steps.map((step) => (
             <div key={step.number} className="relative">
-              <div className="bg-cream rounded-2xl p-8 h-full">
-                <span className="font-serif text-5xl text-terracotta/30">
+              <div className="bg-card rounded-2xl p-8 h-full border">
+                <span className="font-serif text-5xl text-primary/30">
                   {step.number}
                 </span>
                 <h3 className="mt-4 text-xl font-semibold text-walnut">
@@ -168,7 +165,7 @@ function DifferentiatorsSection() {
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
           {features.map((feature, index) => (
             <div key={index} className="text-center md:text-left">
-              <p className="text-sm font-medium text-terracotta uppercase tracking-wide">
+              <p className="text-sm font-medium text-primary uppercase tracking-wide">
                 {feature.subtitle}
               </p>
               <h3 className="mt-2 text-xl font-semibold text-walnut">
@@ -211,7 +208,7 @@ function TestimonialsSection() {
   ];
 
   return (
-    <section className="py-20 sm:py-28 bg-beige">
+    <section className="py-20 sm:py-28 bg-secondary">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="font-serif text-3xl sm:text-4xl text-walnut">
@@ -223,14 +220,14 @@ function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-cream rounded-2xl p-8"
+              className="bg-card rounded-2xl p-8 border"
             >
               <p className="text-charcoal leading-relaxed">
                 &ldquo;{testimonial.quote}&rdquo;
               </p>
-              <div className="mt-6 pt-4 border-t border-sand">
+              <div className="mt-6 pt-4 border-t">
                 <p className="font-medium text-walnut">{testimonial.name}</p>
-                <p className="text-sm text-charcoal/60">{testimonial.role}</p>
+                <p className="text-sm text-muted-foreground">{testimonial.role}</p>
               </div>
             </div>
           ))}
@@ -286,7 +283,18 @@ function FAQSection() {
           </h2>
         </div>
 
-        <Accordion items={faqs} />
+        <Accordion type="single" collapsible className="w-full">
+          {faqs.map((faq, index) => (
+            <AccordionItem key={index} value={`item-${index}`}>
+              <AccordionTrigger className="text-left text-base font-medium text-walnut">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-charcoal leading-relaxed">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );
@@ -297,7 +305,7 @@ function FAQSection() {
 // ============================================================================
 function FinalCTASection() {
   return (
-    <section className="py-24 sm:py-32 bg-beige">
+    <section className="py-24 sm:py-32 bg-secondary">
       <div className="max-w-[700px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-walnut">
           Ready to stop searching?
@@ -306,13 +314,10 @@ function FinalCTASection() {
           Set up your profile in 3 minutes and let us do the work.
         </p>
         <div className="mt-10">
-          <Link
-            href="/signup"
-            className="inline-flex bg-terracotta text-cream px-8 py-4 rounded-xl text-lg font-medium hover:bg-terracotta-dark transition-colors"
-          >
-            Start Getting Matches
-          </Link>
-          <p className="mt-4 text-sm text-charcoal/60">
+          <Button size="lg" asChild className="text-lg px-8 py-6 h-auto">
+            <Link href="/signup">Start Getting Matches</Link>
+          </Button>
+          <p className="mt-4 text-sm text-muted-foreground">
             Free forever. No credit card required.
           </p>
         </div>
@@ -326,24 +331,24 @@ function FinalCTASection() {
 // ============================================================================
 function Footer() {
   return (
-    <footer className="bg-walnut text-cream/80">
+    <footer className="bg-accent text-accent-foreground">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <Logo size="md" linkTo="/" variant="light" />
 
           <div className="flex items-center gap-6 text-sm">
-            <Link href="/privacy" className="hover:text-cream transition-colors">
+            <Link href="/privacy" className="hover:opacity-80 transition-opacity">
               Privacy
             </Link>
-            <Link href="/terms" className="hover:text-cream transition-colors">
+            <Link href="/terms" className="hover:opacity-80 transition-opacity">
               Terms
             </Link>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-cream/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
+        <div className="mt-8 pt-8 border-t border-accent-foreground/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
           <p>&copy; {new Date().getFullYear()} Jobfishing. All rights reserved.</p>
-          <p className="text-cream/60">Made with care in Zurich</p>
+          <p className="opacity-60">Made with care in Zurich</p>
         </div>
       </div>
     </footer>
@@ -377,7 +382,7 @@ export default async function Home() {
 
   // Show landing page for unauthenticated users
   return (
-    <div className="min-h-screen flex flex-col bg-cream">
+    <div className="min-h-screen flex flex-col bg-background">
       <LandingHeader />
       <main className="flex-1">
         <HeroSection />

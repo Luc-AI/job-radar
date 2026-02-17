@@ -1,8 +1,9 @@
 "use client";
 
 import { useActionState, useState, useCallback } from "react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/components/ui/FileUpload";
 import Link from "next/link";
 import { saveCV, CVUploadState } from "../actions";
@@ -149,10 +150,16 @@ export default function OnboardingStep2Page() {
             <Button
               type="submit"
               size="lg"
-              isLoading={pending}
-              disabled={!hasContent || isUploading}
+              disabled={pending || !hasContent || isUploading}
             >
-              Next
+              {pending ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Next"
+              )}
             </Button>
           </div>
         </form>

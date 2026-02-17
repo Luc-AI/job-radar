@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -26,8 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${jakarta.variable} font-sans antialiased bg-cream`}>
+      <body className={`${playfair.variable} ${jakarta.variable} font-sans antialiased bg-background`}>
         {children}
+        <Toaster />
       </body>
     </html>
   );

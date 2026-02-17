@@ -37,8 +37,8 @@ export default async function ProfilePage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-slate-900">Profile</h1>
-        <p className="mt-1 text-slate-600">
+        <h1 className="text-2xl font-semibold">Profile</h1>
+        <p className="mt-1 text-muted-foreground">
           Manage your job preferences and CV
         </p>
       </div>

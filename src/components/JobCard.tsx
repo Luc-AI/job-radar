@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/Card";
+import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
 import { JobWithEvaluation, EvaluationStatus } from "@/types/database";
-import { useToast } from "@/components/ui/Toast";
 import { updateJobStatus } from "@/app/(app)/jobs/[id]/actions";
 import { CompanyLogo } from "@/components/CompanyLogo";
 
@@ -104,7 +104,6 @@ function formatDate(dateString: string | null): string {
 export function JobCard({ evaluation }: JobCardProps) {
   const { job } = evaluation;
   const router = useRouter();
-  const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [currentStatus, setCurrentStatus] = useState(evaluation.status);
 
@@ -123,11 +122,11 @@ export function JobCard({ evaluation }: JobCardProps) {
     startTransition(async () => {
       const result = await updateJobStatus(evaluation.uuid_evaluation, newStatus);
       if (result.success) {
-        showToast(STATUS_MESSAGES[newStatus], "success");
+        toast.success(STATUS_MESSAGES[newStatus]);
         router.refresh();
       } else {
         setCurrentStatus(previousStatus);
-        showToast(result.error || "Failed to update status", "error");
+        toast.error(result.error || "Failed to update status");
       }
     });
   };
@@ -146,10 +145,7 @@ export function JobCard({ evaluation }: JobCardProps) {
 
   return (
     <Link href={`/jobs/${evaluation.uuid_evaluation}`} data-testid="job-card">
-      <Card
-        padding="none"
-        className="hover:shadow-md hover:border-slate-300 transition-all cursor-pointer"
-      >
+      <Card className="hover:shadow-md hover:border-border transition-all cursor-pointer p-0">
         <div className="p-4 sm:p-5">
           {/* Header: Logo, Title, Score, Status */}
           <div className="flex items-start justify-between gap-3">

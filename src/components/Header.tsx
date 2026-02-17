@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Logo } from "./Logo";
-import { Button } from "./ui/Button";
+import { Button } from "./ui/button";
 import { logout } from "@/app/(auth)/actions";
 
 interface HeaderProps {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { saveFinalDetails, FinalDetailsState } from "../actions";
 
@@ -147,8 +148,15 @@ export default function OnboardingStep3Page() {
                 Back
               </Button>
             </Link>
-            <Button type="submit" size="lg" isLoading={pending}>
-              Start Matching
+            <Button type="submit" size="lg" disabled={pending}>
+              {pending ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Starting...
+                </>
+              ) : (
+                "Start Matching"
+              )}
             </Button>
           </div>
         </form>

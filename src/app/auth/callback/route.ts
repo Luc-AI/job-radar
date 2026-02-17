@@ -4,9 +4,9 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const forwardedHost = request.headers.get("x-forwarded-host");
-  const origin = forwardedHost
-    ? `https://${forwardedHost}`
-    : new URL(request.url).origin;
+  const host = forwardedHost || new URL(request.url).host;
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const origin = `${protocol}://${host}`;
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/onboarding/step-1";
 
@@ -15,6 +15,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // If a specific next path is requested (e.g., password reset), use it directly
+      if (next && next !== "/onboarding/step-1") {
+        return NextResponse.redirect(`${origin}${next}`);
+      }
+
       // Check if user has completed onboarding
       const {
         data: { user },

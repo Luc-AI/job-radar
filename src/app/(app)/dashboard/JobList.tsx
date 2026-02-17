@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { JobCard } from "@/components/JobCard";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   JobWithEvaluation,
   JobFilters as JobFiltersType,
@@ -167,9 +168,16 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
                 <Button
                   variant="secondary"
                   onClick={handleLoadMore}
-                  isLoading={isPending}
+                  disabled={isPending}
                 >
-                  Load More
+                  {isPending ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Load More"
+                  )}
                 </Button>
               </div>
             )}

@@ -1,10 +1,14 @@
 "use client";
 
 import { useActionState, useState, useCallback, useEffect, useRef } from "react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { FileUpload } from "@/components/ui/FileUpload";
-import { useToast } from "@/components/ui/Toast";
 import { updateCV, CVState } from "./actions";
 
 interface CVFormProps {
@@ -15,8 +19,6 @@ interface CVFormProps {
 const initialState: CVState = {};
 
 export function CVForm({ initialCvRaw, lastUpdated }: CVFormProps) {
-  const { showToast } = useToast();
-
   // Form state
   const [cvText, setCvText] = useState(initialCvRaw || "");
   const [fileName, setFileName] = useState<string | undefined>();
@@ -33,14 +35,14 @@ export function CVForm({ initialCvRaw, lastUpdated }: CVFormProps) {
   // Handle success/error toasts
   useEffect(() => {
     if (state.success && !prevStateRef.current.success) {
-      showToast("CV updated successfully", "success");
+      toast.success("CV updated successfully");
       setFileName(undefined);
     }
     if (state.error && state.error !== prevStateRef.current.error) {
-      showToast(state.error, "error");
+      toast.error(state.error);
     }
     prevStateRef.current = state;
-  }, [state, showToast]);
+  }, [state]);
 
   const handleFileSelect = useCallback(async (file: File) => {
     setIsUploading(true);
@@ -97,127 +99,128 @@ export function CVForm({ initialCvRaw, lastUpdated }: CVFormProps) {
 
   return (
     <Card>
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-slate-900">CV / Resume</h2>
-        <p className="mt-1 text-sm text-slate-600">
+      <CardHeader>
+        <CardTitle>CV / Resume</CardTitle>
+        <CardDescription>
           {initialCvRaw ? formatLastUpdated(lastUpdated) : "Upload your CV to improve job matching."}
-        </p>
-      </div>
+        </CardDescription>
+      </CardHeader>
 
-      {state.error && (
-        <div className="mb-6 p-3 rounded-lg bg-red-50 border border-red-200">
-          <p className="text-sm text-red-600">{state.error}</p>
-        </div>
-      )}
-
-      <form action={formAction} className="space-y-6">
-        <input type="hidden" name="cvRaw" value={cvText} />
-
-        {/* Current CV preview (if exists and not editing) */}
-        {initialCvRaw && !isExpanded && !hasChanges && (
-          <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-600 whitespace-pre-wrap break-words">
-                  {getPreviewText(initialCvRaw)}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsExpanded(true)}
-              >
-                Edit
-              </Button>
-            </div>
+      <CardContent>
+        {state.error && (
+          <div className="mb-6 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-sm text-destructive">{state.error}</p>
           </div>
         )}
 
-        {/* Expanded edit view */}
-        {(isExpanded || hasChanges || !initialCvRaw) && (
-          <>
-            {/* File upload */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Upload a new file
-              </label>
-              <FileUpload
-                onFileSelect={handleFileSelect}
-                isLoading={isUploading}
-                error={uploadError || undefined}
-                uploadedFileName={fileName}
-              />
-            </div>
+        <form action={formAction} className="space-y-6">
+          <input type="hidden" name="cvRaw" value={cvText} />
 
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white text-slate-500">
-                  or edit text directly
-                </span>
+          {/* Current CV preview (if exists and not editing) */}
+          {initialCvRaw && !isExpanded && !hasChanges && (
+            <div className="p-4 bg-muted rounded-lg border">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
+                    {getPreviewText(initialCvRaw)}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsExpanded(true)}
+                >
+                  Edit
+                </Button>
               </div>
             </div>
-
-            {/* Text edit area */}
-            <div>
-              <label
-                htmlFor="cv-text-edit"
-                className="block text-sm font-medium text-slate-700 mb-2"
-              >
-                CV content
-              </label>
-              <textarea
-                id="cv-text-edit"
-                value={cvText}
-                onChange={(e) => {
-                  setCvText(e.target.value);
-                  if (e.target.value !== cvText) {
-                    setFileName(undefined);
-                  }
-                }}
-                placeholder="Paste or type your CV/resume text here..."
-                rows={12}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 placeholder:text-slate-400
-                  focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent
-                  resize-none font-mono text-sm"
-              />
-              {cvText.length > 0 && (
-                <p className="mt-1 text-xs text-slate-500">
-                  {cvText.length.toLocaleString()} characters
-                </p>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Actions */}
-        <div className="flex justify-end gap-3 pt-6 border-t border-slate-200">
-          {hasChanges && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                setCvText(initialCvRaw || "");
-                setFileName(undefined);
-                setIsExpanded(false);
-              }}
-            >
-              Cancel
-            </Button>
           )}
-          <Button
-            type="submit"
-            isLoading={pending}
-            disabled={!hasContent || isUploading || !hasChanges}
-          >
-            Save
-          </Button>
-        </div>
-      </form>
+
+          {/* Expanded edit view */}
+          {(isExpanded || hasChanges || !initialCvRaw) && (
+            <>
+              {/* File upload */}
+              <div>
+                <Label className="mb-2 block">Upload a new file</Label>
+                <FileUpload
+                  onFileSelect={handleFileSelect}
+                  isLoading={isUploading}
+                  error={uploadError || undefined}
+                  uploadedFileName={fileName}
+                />
+              </div>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-3 text-muted-foreground">
+                    or edit text directly
+                  </span>
+                </div>
+              </div>
+
+              {/* Text edit area */}
+              <div>
+                <Label htmlFor="cv-text-edit" className="mb-2 block">
+                  CV content
+                </Label>
+                <Textarea
+                  id="cv-text-edit"
+                  value={cvText}
+                  onChange={(e) => {
+                    setCvText(e.target.value);
+                    if (e.target.value !== cvText) {
+                      setFileName(undefined);
+                    }
+                  }}
+                  placeholder="Paste or type your CV/resume text here..."
+                  rows={12}
+                  className="font-mono text-sm resize-none"
+                />
+                {cvText.length > 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {cvText.length.toLocaleString()} characters
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-6 border-t">
+            {hasChanges && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setCvText(initialCvRaw || "");
+                  setFileName(undefined);
+                  setIsExpanded(false);
+                }}
+              >
+                Cancel
+              </Button>
+            )}
+            <Button
+              type="submit"
+              disabled={!hasContent || isUploading || !hasChanges || pending}
+            >
+              {pending ? (
+                <>
+                  <Loader2 className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
     </Card>
   );
 }

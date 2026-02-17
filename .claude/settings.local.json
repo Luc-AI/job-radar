@@ -19,7 +19,16 @@
       "Bash(git checkout:*)",
       "Bash(git merge:*)",
       "Bash(git stash:*)",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "Bash(for i in 1 2 3)",
+      "Bash(do echo \"Run $i:\")",
+      "Bash(done)",
+      "Bash(pnpm dlx shadcn@latest mcp init:*)",
+      "Bash(npx shadcn@latest mcp init:*)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx next build:*)",
+      "Bash(find:*)"
     ]
   }
 }
