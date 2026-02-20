@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { Loader2, Briefcase } from "lucide-react";
+import { Loader, Briefcase } from "react-feather";
 import { JobCard } from "@/components/JobCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -121,7 +121,7 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
       <div>
         {isFiltering ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="animate-spin h-8 w-8 text-muted-foreground" />
+            <Loader className="animate-spin h-8 w-8 text-muted-foreground" />
           </div>
         ) : jobs.length === 0 ? (
           emptyState
@@ -142,7 +142,7 @@ export function JobList({ initialJobs, totalCount, pageSize }: JobListProps) {
                 >
                   {isPending ? (
                     <>
-                      <Loader2 className="animate-spin" />
+                      <Loader className="animate-spin" />
                       Loading...
                     </>
                   ) : (

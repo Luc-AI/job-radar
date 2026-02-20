@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader } from "react-feather";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -151,7 +151,7 @@ export default function OnboardingStep3Page() {
             <Button type="submit" size="lg" disabled={pending}>
               {pending ? (
                 <>
-                  <Loader2 className="animate-spin" />
+                  <Loader className="animate-spin" />
                   Starting...
                 </>
               ) : (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, useEffect, useRef } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader } from "react-feather";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,7 +82,7 @@ function EmailEditForm({
         >
           {emailPending ? (
             <>
-              <Loader2 className="animate-spin" />
+              <Loader className="animate-spin" />
               Updating...
             </>
           ) : (
@@ -232,7 +232,7 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
                 >
                   {deletePending ? (
                     <>
-                      <Loader2 className="animate-spin" />
+                      <Loader className="animate-spin" />
                       Deleting...
                     </>
                   ) : (

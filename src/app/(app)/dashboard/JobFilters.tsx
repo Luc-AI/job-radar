@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, X } from "react-feather";
 import {
   Popover,
   PopoverContent,

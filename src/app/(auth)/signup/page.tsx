@@ -2,7 +2,7 @@
 
 import { useState, useActionState } from "react";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader } from "react-feather";
 import { signup, type AuthState } from "../actions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,7 +91,7 @@ export default function SignupPage() {
         >
           {googleLoading ? (
             <>
-              <Loader2 className="animate-spin" />
+              <Loader className="animate-spin" />
               Connecting...
             </>
           ) : (
@@ -140,7 +140,7 @@ export default function SignupPage() {
           <Button type="submit" className="w-full" size="lg" disabled={pending}>
             {pending ? (
               <>
-                <Loader2 className="animate-spin" />
+                <Loader className="animate-spin" />
                 Creating account...
               </>
             ) : (

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ExternalLink, Bookmark, CheckCircle, EyeOff } from "lucide-react";
+import { ExternalLink, Bookmark, CheckCircle, EyeOff } from "react-feather";
 import { Button } from "@/components/ui/button";
 import { EvaluationStatus } from "@/types/database";
 import { updateJobStatus } from "./actions";

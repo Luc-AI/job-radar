@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader } from "react-feather";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -121,7 +121,7 @@ export default function OnboardingStep1Page() {
             <Button type="submit" size="lg" disabled={pending}>
               {pending ? (
                 <>
-                  <Loader2 className="animate-spin" />
+                  <Loader className="animate-spin" />
                   Saving...
                 </>
               ) : (

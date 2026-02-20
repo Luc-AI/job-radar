@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, useCallback } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader } from "react-feather";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/components/ui/FileUpload";
@@ -154,7 +154,7 @@ export default function OnboardingStep2Page() {
             >
               {pending ? (
                 <>
-                  <Loader2 className="animate-spin" />
+                  <Loader className="animate-spin" />
                   Saving...
                 </>
               ) : (

@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader, CheckCircle } from "react-feather";
 import { resetPassword, type AuthState } from "../actions";
 import {
   Card,
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
           <Button type="submit" className="w-full" size="lg" disabled={pending}>
             {pending ? (
               <>
-                <Loader2 className="animate-spin" />
+                <Loader className="animate-spin" />
                 Updating password...
               </>
             ) : (

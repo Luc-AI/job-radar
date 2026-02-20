@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState, useEffect, useRef } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader } from "react-feather";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -97,7 +97,7 @@ export function CareerAspirationsForm({
             <Button type="submit" disabled={pending || !hasChanges}>
               {pending ? (
                 <>
-                  <Loader2 className="animate-spin" />
+                  <Loader className="animate-spin" />
                   Saving...
                 </>
               ) : (

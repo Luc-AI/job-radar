@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { Loader2, ArrowLeft, Mail } from "lucide-react";
+import { Loader, ArrowLeft, Mail } from "react-feather";
 import { forgotPassword, type AuthState } from "../actions";
 import {
   Card,
@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
           <Button type="submit" className="w-full" size="lg" disabled={pending}>
             {pending ? (
               <>
-                <Loader2 className="animate-spin" />
+                <Loader className="animate-spin" />
                 Sending reset link...
               </>
             ) : (

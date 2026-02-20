@@ -3,7 +3,7 @@
 import { useState, useActionState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader } from "react-feather";
 import { login, type AuthState } from "../actions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -92,7 +92,7 @@ function LoginForm() {
         >
           {googleLoading ? (
             <>
-              <Loader2 className="animate-spin" />
+              <Loader className="animate-spin" />
               Connecting...
             </>
           ) : (
@@ -149,7 +149,7 @@ function LoginForm() {
           <Button type="submit" className="w-full" size="lg" disabled={pending}>
             {pending ? (
               <>
-                <Loader2 className="animate-spin" />
+                <Loader className="animate-spin" />
                 Signing in...
               </>
             ) : (
