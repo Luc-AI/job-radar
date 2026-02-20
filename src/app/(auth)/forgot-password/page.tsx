@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <Mail className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-serif text-walnut">
+          <CardTitle className="text-2xl font-semibold">
             Check your email
           </CardTitle>
           <CardDescription>
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-serif text-walnut">
+        <CardTitle className="text-2xl font-semibold">
           Reset your password
         </CardTitle>
         <CardDescription>

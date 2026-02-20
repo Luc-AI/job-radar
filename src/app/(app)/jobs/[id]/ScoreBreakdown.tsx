@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Evaluation } from "@/types/database";
 
 interface ScoreBreakdownProps {
@@ -51,46 +53,36 @@ export function ScoreBreakdown({ evaluation }: ScoreBreakdownProps) {
     },
   ];
 
-  const getScoreColor = (score: number) => {
-    if (score >= 9) return "bg-green-500";
-    if (score >= 8) return "bg-blue-500";
-    if (score >= 7) return "bg-sky-500";
-    if (score >= 6) return "bg-amber-500";
-    return "bg-slate-400";
-  };
-
   const getScoreTextColor = (score: number) => {
     if (score >= 9) return "text-green-700";
     if (score >= 8) return "text-blue-700";
     if (score >= 7) return "text-sky-700";
     if (score >= 6) return "text-amber-700";
-    return "text-slate-600";
+    return "text-muted-foreground";
+  };
+
+  const getProgressColor = (score: number) => {
+    if (score >= 9) return "[&>div]:bg-green-500";
+    if (score >= 8) return "[&>div]:bg-blue-500";
+    if (score >= 7) return "[&>div]:bg-sky-500";
+    if (score >= 6) return "[&>div]:bg-amber-500";
+    return "[&>div]:bg-muted-foreground";
   };
 
   return (
-    <Card>
+    <Card className="p-6">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between text-left lg:pointer-events-none"
       >
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-foreground">
           AI Match Breakdown
         </h2>
-        <svg
-          className={`w-5 h-5 text-slate-400 transition-transform lg:hidden ${
+        <ChevronDown
+          className={`h-5 w-5 text-muted-foreground transition-transform lg:hidden ${
             isExpanded ? "rotate-180" : ""
           }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        />
       </button>
 
       <div
@@ -100,8 +92,8 @@ export function ScoreBreakdown({ evaluation }: ScoreBreakdownProps) {
       >
         {/* Overall Summary */}
         {evaluation.reason_overall && (
-          <div className="p-3 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-700 leading-relaxed">
+          <div className="p-3 bg-muted rounded-lg">
+            <p className="text-sm text-foreground leading-relaxed">
               {evaluation.reason_overall}
             </p>
           </div>
@@ -116,7 +108,7 @@ export function ScoreBreakdown({ evaluation }: ScoreBreakdownProps) {
             return (
               <div key={dimension.key} className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-700">
+                  <span className="text-sm font-medium text-foreground">
                     {dimension.label}
                   </span>
                   <span
@@ -127,16 +119,14 @@ export function ScoreBreakdown({ evaluation }: ScoreBreakdownProps) {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${getScoreColor(dimension.score)}`}
-                    style={{ width: `${percentage}%` }}
-                  />
-                </div>
+                <Progress
+                  value={percentage}
+                  className={`h-2 ${getProgressColor(dimension.score)}`}
+                />
 
                 {/* Reason */}
                 {dimension.reason && (
-                  <p className="text-xs text-slate-500 leading-relaxed">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {dimension.reason}
                   </p>
                 )}

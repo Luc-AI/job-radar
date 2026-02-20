@@ -1,36 +1,23 @@
-"use client";
-
-import { useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
-import { Header } from "@/components/Header";
-import { MobileNav } from "@/components/MobileNav";
-import { ToastProvider } from "@/components/ui/Toast";
+import { AppSidebar } from "@/components/AppSidebar";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   return (
-    <ToastProvider>
-      <div className="min-h-screen bg-slate-50">
-        {/* Desktop sidebar */}
-        <Sidebar />
-
-        {/* Mobile navigation */}
-        <MobileNav
-          isOpen={mobileMenuOpen}
-          onClose={() => setMobileMenuOpen(false)}
-        />
-
-        {/* Main content area */}
-        <div className="lg:pl-64">
-          <Header
-            showMobileMenu={mobileMenuOpen}
-            onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
-          />
-
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 64)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
           <main className="px-4 py-6 lg:px-8">{children}</main>
         </div>
-      </div>
-    </ToastProvider>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

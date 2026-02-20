@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-playfair",
-});
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -27,8 +22,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${jakarta.variable} font-sans antialiased bg-background`}>
-        {children}
+      <body className={`${jakarta.variable} font-sans antialiased`}>
+        <TooltipProvider>{children}</TooltipProvider>
         <Toaster />
       </body>
     </html>

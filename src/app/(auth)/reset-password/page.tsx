@@ -30,7 +30,7 @@ export default function ResetPasswordPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
             <CheckCircle className="h-6 w-6 text-green-600" />
           </div>
-          <CardTitle className="text-2xl font-serif text-walnut">
+          <CardTitle className="text-2xl font-semibold">
             Password updated
           </CardTitle>
           <CardDescription>
@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-serif text-walnut">
+        <CardTitle className="text-2xl font-semibold">
           Set new password
         </CardTitle>
         <CardDescription>Enter your new password below.</CardDescription>

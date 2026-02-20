@@ -1,6 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { ChevronDown, X } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   JobFilters as JobFiltersType,
   ScoreRange,
@@ -35,130 +46,8 @@ const STATUS_OPTIONS: { value: EvaluationStatus; label: string }[] = [
   { value: "hidden", label: "Hidden" },
 ];
 
-function FilterDropdown({
-  label,
-  isOpen,
-  onToggle,
-  selectedCount,
-  children,
-}: {
-  label: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  selectedCount: number;
-  children: React.ReactNode;
-}) {
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        if (isOpen) onToggle();
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onToggle]);
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={onToggle}
-        className={`
-          flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors
-          ${
-            selectedCount > 0
-              ? "bg-slate-900 text-white border-slate-900"
-              : "bg-white text-slate-700 border-slate-300 hover:border-slate-400"
-          }
-        `}
-      >
-        {label}
-        {selectedCount > 0 && (
-          <span className="bg-white text-slate-900 text-xs px-1.5 py-0.5 rounded-full font-medium">
-            {selectedCount}
-          </span>
-        )}
-        <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </button>
-
-      {isOpen && (
-        <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 min-w-[160px] z-20">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function CheckboxOption({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: () => void;
-  label: string;
-}) {
-  return (
-    <label className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={onChange}
-        className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-2 focus:ring-slate-500 focus:ring-offset-0"
-      />
-      <span className="text-sm text-slate-700">{label}</span>
-    </label>
-  );
-}
-
-function RadioOption({
-  checked,
-  onChange,
-  label,
-  name,
-}: {
-  checked: boolean;
-  onChange: () => void;
-  label: string;
-  name: string;
-}) {
-  return (
-    <label className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50">
-      <input
-        type="radio"
-        name={name}
-        checked={checked}
-        onChange={onChange}
-        className="h-4 w-4 border-slate-300 text-slate-900 focus:ring-2 focus:ring-slate-500 focus:ring-offset-0"
-      />
-      <span className="text-sm text-slate-700">{label}</span>
-    </label>
-  );
-}
-
 export function JobFilters({ filters, onFiltersChange }: JobFiltersProps) {
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-
-  const toggleDropdown = (name: string) => {
-    setOpenDropdown(openDropdown === name ? null : name);
-  };
+  const [openPopover, setOpenPopover] = useState<string | null>(null);
 
   const toggleScoreRange = (range: ScoreRange) => {
     const newRanges = filters.scoreRanges.includes(range)
@@ -169,7 +58,7 @@ export function JobFilters({ filters, onFiltersChange }: JobFiltersProps) {
 
   const setDatePosted = (date: DatePosted | null) => {
     onFiltersChange({ ...filters, datePosted: date });
-    setOpenDropdown(null);
+    setOpenPopover(null);
   };
 
   const toggleStatus = (status: EvaluationStatus) => {
@@ -195,65 +84,161 @@ export function JobFilters({ filters, onFiltersChange }: JobFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Score Filter */}
-      <FilterDropdown
-        label="Match Score"
-        isOpen={openDropdown === "score"}
-        onToggle={() => toggleDropdown("score")}
-        selectedCount={filters.scoreRanges.length}
+      <Popover
+        open={openPopover === "score"}
+        onOpenChange={(open) => setOpenPopover(open ? "score" : null)}
       >
-        {SCORE_OPTIONS.map((option) => (
-          <CheckboxOption
-            key={option.value}
-            checked={filters.scoreRanges.includes(option.value)}
-            onChange={() => toggleScoreRange(option.value)}
-            label={option.label}
-          />
-        ))}
-      </FilterDropdown>
+        <PopoverTrigger asChild>
+          <Button
+            variant={filters.scoreRanges.length > 0 ? "default" : "outline"}
+            size="sm"
+            className="gap-2"
+          >
+            Match Score
+            {filters.scoreRanges.length > 0 && (
+              <Badge
+                variant="secondary"
+                className="bg-primary-foreground text-primary px-1.5 py-0"
+              >
+                {filters.scoreRanges.length}
+              </Badge>
+            )}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${
+                openPopover === "score" ? "rotate-180" : ""
+              }`}
+            />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-44 p-2" align="start">
+          <div className="space-y-1">
+            {SCORE_OPTIONS.map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-muted"
+              >
+                <Checkbox
+                  checked={filters.scoreRanges.includes(option.value)}
+                  onCheckedChange={() => toggleScoreRange(option.value)}
+                />
+                <span className="text-sm">{option.label}</span>
+              </label>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
 
       {/* Date Filter */}
-      <FilterDropdown
-        label="Date Posted"
-        isOpen={openDropdown === "date"}
-        onToggle={() => toggleDropdown("date")}
-        selectedCount={filters.datePosted ? 1 : 0}
+      <Popover
+        open={openPopover === "date"}
+        onOpenChange={(open) => setOpenPopover(open ? "date" : null)}
       >
-        {DATE_OPTIONS.map((option) => (
-          <RadioOption
-            key={option.value ?? "any"}
-            name="datePosted"
-            checked={filters.datePosted === option.value}
-            onChange={() => setDatePosted(option.value)}
-            label={option.label}
-          />
-        ))}
-      </FilterDropdown>
+        <PopoverTrigger asChild>
+          <Button
+            variant={filters.datePosted ? "default" : "outline"}
+            size="sm"
+            className="gap-2"
+          >
+            Date Posted
+            {filters.datePosted && (
+              <Badge
+                variant="secondary"
+                className="bg-primary-foreground text-primary px-1.5 py-0"
+              >
+                1
+              </Badge>
+            )}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${
+                openPopover === "date" ? "rotate-180" : ""
+              }`}
+            />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-44 p-2" align="start">
+          <RadioGroup
+            value={filters.datePosted ?? "any"}
+            onValueChange={(value) =>
+              setDatePosted(value === "any" ? null : (value as DatePosted))
+            }
+          >
+            {DATE_OPTIONS.map((option) => (
+              <div
+                key={option.value ?? "any"}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted"
+              >
+                <RadioGroupItem
+                  value={option.value ?? "any"}
+                  id={`date-${option.value ?? "any"}`}
+                />
+                <Label
+                  htmlFor={`date-${option.value ?? "any"}`}
+                  className="text-sm cursor-pointer flex-1"
+                >
+                  {option.label}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </PopoverContent>
+      </Popover>
 
       {/* Status Filter */}
-      <FilterDropdown
-        label="Status"
-        isOpen={openDropdown === "status"}
-        onToggle={() => toggleDropdown("status")}
-        selectedCount={filters.statuses.length}
+      <Popover
+        open={openPopover === "status"}
+        onOpenChange={(open) => setOpenPopover(open ? "status" : null)}
       >
-        {STATUS_OPTIONS.map((option) => (
-          <CheckboxOption
-            key={option.value}
-            checked={filters.statuses.includes(option.value)}
-            onChange={() => toggleStatus(option.value)}
-            label={option.label}
-          />
-        ))}
-      </FilterDropdown>
+        <PopoverTrigger asChild>
+          <Button
+            variant={filters.statuses.length > 0 ? "default" : "outline"}
+            size="sm"
+            className="gap-2"
+          >
+            Status
+            {filters.statuses.length > 0 && (
+              <Badge
+                variant="secondary"
+                className="bg-primary-foreground text-primary px-1.5 py-0"
+              >
+                {filters.statuses.length}
+              </Badge>
+            )}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${
+                openPopover === "status" ? "rotate-180" : ""
+              }`}
+            />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-44 p-2" align="start">
+          <div className="space-y-1">
+            {STATUS_OPTIONS.map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-muted"
+              >
+                <Checkbox
+                  checked={filters.statuses.includes(option.value)}
+                  onCheckedChange={() => toggleStatus(option.value)}
+                />
+                <span className="text-sm">{option.label}</span>
+              </label>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
 
       {/* Clear Filters */}
       {hasActiveFilters && (
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={clearFilters}
-          className="text-sm text-slate-500 hover:text-slate-700 px-2 py-2"
+          className="text-muted-foreground"
         >
+          <X className="h-4 w-4" />
           Clear all
-        </button>
+        </Button>
       )}
     </div>
   );

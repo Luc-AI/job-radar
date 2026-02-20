@@ -1,3 +1,5 @@
+import { Card } from "@/components/ui/card";
+
 interface KpiStatsProps {
   totalJobs: number;
   newToday: number;
@@ -22,12 +24,10 @@ function StatBox({
   };
 
   return (
-    <div
-      className={`rounded-xl px-4 py-3 flex flex-col justify-center ${colorClasses[color]}`}
-    >
+    <Card className={`px-4 py-3 ${colorClasses[color]} border-0`}>
       <div className="text-2xl font-bold">{value}</div>
       <div className="text-sm opacity-80">{label}</div>
-    </div>
+    </Card>
   );
 }
 

@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { SortOption } from "@/types/database";
 
 interface JobSortProps {
@@ -16,21 +24,21 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 export function JobSort({ value, onChange }: JobSortProps) {
   return (
     <div className="flex items-center gap-2">
-      <label htmlFor="sort" className="text-sm text-slate-600">
+      <Label htmlFor="sort" className="text-sm text-muted-foreground">
         Sort by:
-      </label>
-      <select
-        id="sort"
-        value={value}
-        onChange={(e) => onChange(e.target.value as SortOption)}
-        className="text-sm border border-slate-300 rounded-md px-3 py-1.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-      >
-        {SORT_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      </Label>
+      <Select value={value} onValueChange={(v) => onChange(v as SortOption)}>
+        <SelectTrigger id="sort" className="w-[180px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {SORT_OPTIONS.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

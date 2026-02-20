@@ -13,10 +13,10 @@ export function Logo({ size = "md", linkTo = "/", variant = "dark" }: LogoProps)
     lg: "text-2xl",
   };
 
-  const textColor = variant === "dark" ? "text-walnut" : "text-cream";
+  const textColor = variant === "dark" ? "text-foreground" : "text-background";
 
   const content = (
-    <span className={`font-serif font-medium ${textColor} ${sizes[size]}`}>
+    <span className={`font-semibold tracking-tight ${textColor} ${sizes[size]}`}>
       Jobfishing
     </span>
   );

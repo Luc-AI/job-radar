@@ -15,17 +15,17 @@ import {
 // ============================================================================
 function LandingHeader() {
   return (
-    <header className="sticky top-0 z-50 bg-cream/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
       <nav className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Logo size="lg" linkTo="/" />
 
           <div className="flex items-center gap-4">
             {/* Language Toggle */}
-            <div className="hidden sm:flex items-center gap-1 text-sm text-charcoal">
+            <div className="hidden sm:flex items-center gap-1 text-sm text-foreground">
               <span className="font-medium">EN</span>
-              <span className="text-sand">/</span>
-              <span className="text-charcoal/60 hover:text-charcoal cursor-pointer transition-colors">DE</span>
+              <span className="text-muted-foreground">/</span>
+              <span className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors">DE</span>
             </div>
 
             <Button variant="ghost" asChild>
@@ -49,11 +49,11 @@ function HeroSection() {
   return (
     <section className="pt-20 pb-24 sm:pt-32 sm:pb-36">
       <div className="max-w-[900px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-walnut leading-tight">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-foreground leading-tight tracking-tight">
           Stop scrolling job boards.<br />
-          <span className="text-primary">We&apos;ll find the good ones for you.</span>
+          <span className="text-muted-foreground">We&apos;ll find the good ones for you.</span>
         </h1>
-        <p className="mt-8 text-lg sm:text-xl text-charcoal leading-relaxed max-w-2xl mx-auto">
+        <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
           Upload your CV once. Our AI scans thousands of jobs daily and sends you only the ones that actually fit — scored, ranked, and delivered to your inbox.
         </p>
         <div className="mt-12">
@@ -95,10 +95,10 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 sm:py-28 bg-secondary">
+    <section id="how-it-works" className="py-20 sm:py-28 bg-muted/50">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="font-serif text-3xl sm:text-4xl text-walnut">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
             How It Works
           </h2>
           <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
@@ -109,14 +109,14 @@ function HowItWorksSection() {
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
           {steps.map((step) => (
             <div key={step.number} className="relative">
-              <div className="bg-card rounded-2xl p-8 h-full border">
-                <span className="font-serif text-5xl text-primary/30">
+              <div className="bg-card rounded-xl p-8 h-full border">
+                <span className="text-5xl font-semibold text-muted-foreground/30">
                   {step.number}
                 </span>
-                <h3 className="mt-4 text-xl font-semibold text-walnut">
+                <h3 className="mt-4 text-xl font-semibold text-foreground">
                   {step.title}
                 </h3>
-                <p className="mt-3 text-charcoal leading-relaxed">
+                <p className="mt-3 text-muted-foreground leading-relaxed">
                   {step.description}
                 </p>
               </div>
@@ -157,7 +157,7 @@ function DifferentiatorsSection() {
     <section className="py-20 sm:py-28">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="font-serif text-3xl sm:text-4xl text-walnut">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
             Why Jobfishing?
           </h2>
         </div>
@@ -165,13 +165,13 @@ function DifferentiatorsSection() {
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
           {features.map((feature, index) => (
             <div key={index} className="text-center md:text-left">
-              <p className="text-sm font-medium text-primary uppercase tracking-wide">
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                 {feature.subtitle}
               </p>
-              <h3 className="mt-2 text-xl font-semibold text-walnut">
+              <h3 className="mt-2 text-xl font-semibold text-foreground">
                 {feature.title}
               </h3>
-              <p className="mt-3 text-charcoal leading-relaxed">
+              <p className="mt-3 text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
             </div>
@@ -208,10 +208,10 @@ function TestimonialsSection() {
   ];
 
   return (
-    <section className="py-20 sm:py-28 bg-secondary">
+    <section className="py-20 sm:py-28 bg-muted/50">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="font-serif text-3xl sm:text-4xl text-walnut">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
             People seem to like it
           </h2>
         </div>
@@ -220,13 +220,13 @@ function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-card rounded-2xl p-8 border"
+              className="bg-card rounded-xl p-8 border"
             >
-              <p className="text-charcoal leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed">
                 &ldquo;{testimonial.quote}&rdquo;
               </p>
               <div className="mt-6 pt-4 border-t">
-                <p className="font-medium text-walnut">{testimonial.name}</p>
+                <p className="font-medium text-foreground">{testimonial.name}</p>
                 <p className="text-sm text-muted-foreground">{testimonial.role}</p>
               </div>
             </div>
@@ -278,7 +278,7 @@ function FAQSection() {
     <section className="py-20 sm:py-28">
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="font-serif text-3xl sm:text-4xl text-walnut">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-foreground tracking-tight">
             Questions?
           </h2>
         </div>
@@ -286,10 +286,10 @@ function FAQSection() {
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left text-base font-medium text-walnut">
+              <AccordionTrigger className="text-left text-base font-medium text-foreground">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-charcoal leading-relaxed">
+              <AccordionContent className="text-muted-foreground leading-relaxed">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
@@ -305,12 +305,12 @@ function FAQSection() {
 // ============================================================================
 function FinalCTASection() {
   return (
-    <section className="py-24 sm:py-32 bg-secondary">
+    <section className="py-24 sm:py-32 bg-muted/50">
       <div className="max-w-[700px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-walnut">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-foreground tracking-tight">
           Ready to stop searching?
         </h2>
-        <p className="mt-6 text-lg text-charcoal">
+        <p className="mt-6 text-lg text-muted-foreground">
           Set up your profile in 3 minutes and let us do the work.
         </p>
         <div className="mt-10">
@@ -331,7 +331,7 @@ function FinalCTASection() {
 // ============================================================================
 function Footer() {
   return (
-    <footer className="bg-accent text-accent-foreground">
+    <footer className="bg-foreground text-background">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <Logo size="md" linkTo="/" variant="light" />
@@ -346,7 +346,7 @@ function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-accent-foreground/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
+        <div className="mt-8 pt-8 border-t border-background/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm">
           <p>&copy; {new Date().getFullYear()} Jobfishing. All rights reserved.</p>
           <p className="opacity-60">Made with care in Zurich</p>
         </div>
