@@ -55,12 +55,6 @@ export function FirmaForm({
     setWatchlistCompanies(initialWatchlistCompanies);
   };
 
-  const toggleSize = (size: string) => {
-    setCompanySizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    );
-  };
-
   const [state, formAction, pending] = useActionState(updateBrancheUnternehmen, initialState);
   const prevStateRef = useRef(state);
 
@@ -126,20 +120,27 @@ export function FirmaForm({
           <div>
             <Label className="mb-3 block">Bevorzugte Firmengrösse</Label>
             <div className="grid grid-cols-2 gap-3">
-              {COMPANY_SIZES.map((size) => (
-                <label
+              {COMPANY_SIZES.map((size, idx) => (
+                <div
                   key={size.value}
-                  className="flex items-start space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+                  className="flex items-start space-x-3 rounded-lg border p-3 hover:bg-accent/50 transition-colors"
                 >
                   <Checkbox
+                    id={`profile-company-size-${idx}`}
                     checked={companySizes.includes(size.value)}
-                    onCheckedChange={() => toggleSize(size.value)}
+                    onCheckedChange={(checked) => {
+                      setCompanySizes((prev) =>
+                        checked
+                          ? [...prev, size.value]
+                          : prev.filter((s) => s !== size.value)
+                      );
+                    }}
                   />
-                  <div className="grid gap-0.5 leading-none">
+                  <label htmlFor={`profile-company-size-${idx}`} className="grid gap-0.5 leading-none cursor-pointer">
                     <span className="text-sm font-medium">{size.label}</span>
                     <span className="text-xs text-muted-foreground">{size.description}</span>
-                  </div>
-                </label>
+                  </label>
+                </div>
               ))}
             </div>
             <p className="mt-1.5 text-xs text-muted-foreground">
