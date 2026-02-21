@@ -25,7 +25,12 @@ export type FinalDetailsState = {
 
 const VALID_WORK_MODES = ["onsite", "hybrid", "remote_ok", "remote_solely"];
 const VALID_SENIORITY_LEVELS = ["junior", "mid", "senior", "lead", "clevel"];
-const VALID_COMPANY_SIZES = ["kleinunternehmen", "kmu", "mittelstand", "konzern"];
+const VALID_COMPANY_SIZES = [
+  "Kleinunternehmen (< 50 Mitarbeitende)",
+  "KMU (50–250 Mitarbeitende)",
+  "Mittelstand (250–5.000 Mitarbeitende)",
+  "Konzern (5.000+ Mitarbeitende)",
+];
 
 export async function saveJobPreferences(
   prevState: OnboardingState,

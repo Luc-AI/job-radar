@@ -11,10 +11,10 @@ import { TagInput } from "@/components/ui/TagInput";
 import { updateBrancheUnternehmen, BrancheUnternehmenState } from "./actions";
 
 const COMPANY_SIZES = [
-  { value: "kleinunternehmen", label: "Kleinunternehmen", description: "< 50 Mitarbeitende" },
-  { value: "kmu", label: "KMU", description: "50–250 Mitarbeitende" },
-  { value: "mittelstand", label: "Mittelstand", description: "250–5.000 Mitarbeitende" },
-  { value: "konzern", label: "Konzern", description: "5.000+ Mitarbeitende" },
+  { value: "Kleinunternehmen (< 50 Mitarbeitende)", label: "Kleinunternehmen", description: "< 50 Mitarbeitende" },
+  { value: "KMU (50–250 Mitarbeitende)", label: "KMU", description: "50–250 Mitarbeitende" },
+  { value: "Mittelstand (250–5.000 Mitarbeitende)", label: "Mittelstand", description: "250–5.000 Mitarbeitende" },
+  { value: "Konzern (5.000+ Mitarbeitende)", label: "Konzern", description: "5.000+ Mitarbeitende" },
 ] as const;
 
 interface FirmaFormProps {
