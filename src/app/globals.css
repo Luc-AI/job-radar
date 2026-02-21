@@ -198,6 +198,41 @@ body {
   --sidebar-ring: oklch(0.871 0.006 286.286);
 }
 
+/* Scroll-triggered fade-in animation */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scoring demo progress bars */
+.scoring-bar {
+  width: 0;
+  transition: width 0.8s ease-out;
+}
+
+.is-visible .scoring-bar {
+  width: var(--bar-width);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-on-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .scoring-bar {
+    width: var(--bar-width);
+    transition: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
