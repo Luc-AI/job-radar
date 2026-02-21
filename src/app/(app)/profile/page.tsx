@@ -21,10 +21,10 @@ export default async function ProfilePage() {
       "pref_roles, pref_locations, pref_work_modes, pref_seniority_levels, pref_industries, pref_excluded_industries, pref_dealbreakers, pref_focus, pref_company_sizes, pref_excluded_companies, pref_watchlist_companies, pref_languages"
     )
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    console.error("Error fetching user data:", error);
+    console.error("Error fetching user data:", error.message);
   }
 
   // Dealbreakers and focus were TEXT, now TEXT[] — handle both formats
