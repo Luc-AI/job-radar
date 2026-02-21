@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { JobPreferencesForm } from "./JobPreferencesForm";
-import { CVForm } from "./CVForm";
-import { CareerAspirationsForm } from "./CareerAspirationsForm";
+import { ProfileNav } from "./ProfileNav";
+import { BasicsForm } from "./BasicsForm";
+import { FirmaForm } from "./FirmaForm";
+import { AdvancedForm } from "./AdvancedForm";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -15,10 +16,11 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  // Fetch current user preferences, CV, and career aspirations
   const { data: userData, error } = await supabase
     .from("users")
-    .select("pref_roles, pref_locations, pref_remote, cv_raw, summary, updated_at")
+    .select(
+      "pref_roles, pref_locations, pref_work_modes, pref_seniority_levels, pref_industries, pref_excluded_industries, pref_dealbreakers, pref_focus, pref_company_sizes, pref_excluded_companies, pref_watchlist_companies, pref_languages"
+    )
     .eq("id", user.id)
     .single();
 
@@ -26,36 +28,45 @@ export default async function ProfilePage() {
     console.error("Error fetching user data:", error);
   }
 
-  // Default to empty arrays if no data
-  const prefRoles = userData?.pref_roles || [];
-  const prefLocations = userData?.pref_locations || [];
-  const prefRemote = userData?.pref_remote || false;
-  const cvRaw = userData?.cv_raw || null;
-  const summary = userData?.summary || null;
-  const updatedAt = userData?.updated_at || null;
+  // Dealbreakers and focus were TEXT, now TEXT[] — handle both formats
+  const toPrefArray = (val: unknown): string[] => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === "string" && val.trim()) return [val];
+    return [];
+  };
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold">Profile</h1>
+      <div className="mb-2">
+        <h1 className="text-2xl font-semibold">Profil</h1>
         <p className="mt-1 text-muted-foreground">
-          Manage your job preferences and CV
+          Dein Suchprofil für den perfekten Job.
         </p>
       </div>
 
+      <ProfileNav />
+
       <div className="space-y-6">
-        {/* Story 3.1: Job Preferences */}
-        <JobPreferencesForm
-          initialRoles={prefRoles}
-          initialLocations={prefLocations}
-          initialRemoteOk={prefRemote}
+        <BasicsForm
+          initialRoles={userData?.pref_roles || []}
+          initialLocations={userData?.pref_locations || []}
+          initialWorkModes={userData?.pref_work_modes || []}
+          initialSeniorityLevels={userData?.pref_seniority_levels || []}
         />
 
-        {/* Story 3.2: CV Section */}
-        <CVForm initialCvRaw={cvRaw} lastUpdated={updatedAt} />
+        <FirmaForm
+          initialIndustries={userData?.pref_industries || []}
+          initialExcludedIndustries={userData?.pref_excluded_industries || []}
+          initialCompanySizes={userData?.pref_company_sizes || []}
+          initialExcludedCompanies={userData?.pref_excluded_companies || []}
+          initialWatchlistCompanies={userData?.pref_watchlist_companies || []}
+        />
 
-        {/* Story 3.3: Career Aspirations */}
-        <CareerAspirationsForm initialSummary={summary} />
+        <AdvancedForm
+          initialLanguages={userData?.pref_languages || []}
+          initialDealbreakers={toPrefArray(userData?.pref_dealbreakers)}
+          initialFocus={toPrefArray(userData?.pref_focus)}
+        />
       </div>
     </div>
   );
