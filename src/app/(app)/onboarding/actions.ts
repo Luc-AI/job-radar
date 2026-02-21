@@ -13,10 +13,19 @@ export type OnboardingState = {
   success?: boolean;
 };
 
-export type CVUploadState = {
+export type BrancheUnternehmenState = {
   error?: string;
   success?: boolean;
 };
+
+export type FinalDetailsState = {
+  error?: string;
+  success?: boolean;
+};
+
+const VALID_WORK_MODES = ["onsite", "hybrid", "remote_ok", "remote_solely"];
+const VALID_SENIORITY_LEVELS = ["junior", "mid", "senior", "lead", "clevel"];
+const VALID_COMPANY_SIZES = ["kleinunternehmen", "kmu", "mittelstand", "konzern"];
 
 export async function saveJobPreferences(
   prevState: OnboardingState,
@@ -24,7 +33,6 @@ export async function saveJobPreferences(
 ): Promise<OnboardingState> {
   const supabase = await createClient();
 
-  // Get authenticated user
   const {
     data: { user },
     error: authError,
@@ -34,63 +42,68 @@ export async function saveJobPreferences(
     redirect("/login");
   }
 
-  // Parse form data
   const rolesJson = formData.get("roles") as string;
   const locationsJson = formData.get("locations") as string;
-  const remoteOk = formData.get("remoteOk") === "true";
+  const workModesJson = formData.get("workModes") as string;
+  const seniorityJson = formData.get("seniorityLevels") as string;
 
   let roles: string[] = [];
   let locations: string[] = [];
+  let workModes: string[] = [];
+  let seniorityLevels: string[] = [];
 
   try {
     roles = rolesJson ? JSON.parse(rolesJson) : [];
     locations = locationsJson ? JSON.parse(locationsJson) : [];
+    workModes = workModesJson ? JSON.parse(workModesJson) : [];
+    seniorityLevels = seniorityJson ? JSON.parse(seniorityJson) : [];
   } catch {
     return { error: "Invalid form data" };
   }
 
-  // Validate
   const fieldErrors: OnboardingState["fieldErrors"] = {};
 
   if (roles.length === 0) {
-    fieldErrors.roles = "Please add at least one job title or keyword";
+    fieldErrors.roles = "Bitte mindestens eine Rolle angeben";
   }
 
   if (locations.length === 0) {
-    fieldErrors.locations = "Please add at least one location";
+    fieldErrors.locations = "Bitte mindestens einen Standort angeben";
   }
 
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors };
   }
 
-  // Save to database
+  const validWorkModes = workModes.filter((m) => VALID_WORK_MODES.includes(m));
+  const validSeniority = seniorityLevels.filter((s) => VALID_SENIORITY_LEVELS.includes(s));
+
   const { error: updateError } = await supabase
     .from("users")
     .update({
       pref_roles: roles,
       pref_locations: locations,
-      pref_remote: remoteOk,
+      pref_work_modes: validWorkModes,
+      pref_seniority_levels: validSeniority,
       updated_at: new Date().toISOString(),
     })
     .eq("id", user.id);
 
   if (updateError) {
     console.error("Error saving preferences:", updateError);
-    return { error: "Failed to save preferences. Please try again." };
+    return { error: "Speichern fehlgeschlagen. Bitte erneut versuchen." };
   }
 
   revalidatePath("/", "layout");
   redirect("/onboarding/step-2");
 }
 
-export async function saveCV(
-  prevState: CVUploadState,
+export async function saveBrancheUnternehmen(
+  prevState: BrancheUnternehmenState,
   formData: FormData
-): Promise<CVUploadState> {
+): Promise<BrancheUnternehmenState> {
   const supabase = await createClient();
 
-  // Get authenticated user
   const {
     data: { user },
     error: authError,
@@ -100,38 +113,50 @@ export async function saveCV(
     redirect("/login");
   }
 
-  const cvRaw = formData.get("cvRaw") as string;
+  const industriesJson = formData.get("industries") as string;
+  const excludedIndustriesJson = formData.get("excludedIndustries") as string;
+  const sizesJson = formData.get("companySizes") as string;
+  const excludedJson = formData.get("excludedCompanies") as string;
+  const watchlistJson = formData.get("watchlistCompanies") as string;
 
-  if (!cvRaw || cvRaw.trim().length === 0) {
-    return { error: "Please provide your CV content" };
+  let industries: string[] = [];
+  let excludedIndustries: string[] = [];
+  let companySizes: string[] = [];
+  let excludedCompanies: string[] = [];
+  let watchlistCompanies: string[] = [];
+
+  try {
+    industries = industriesJson ? JSON.parse(industriesJson) : [];
+    excludedIndustries = excludedIndustriesJson ? JSON.parse(excludedIndustriesJson) : [];
+    companySizes = sizesJson ? JSON.parse(sizesJson) : [];
+    excludedCompanies = excludedJson ? JSON.parse(excludedJson) : [];
+    watchlistCompanies = watchlistJson ? JSON.parse(watchlistJson) : [];
+  } catch {
+    return { error: "Invalid form data" };
   }
 
-  if (cvRaw.trim().length < 50) {
-    return { error: "CV content seems too short. Please provide more details about your experience." };
-  }
+  const validSizes = companySizes.filter((s) => VALID_COMPANY_SIZES.includes(s));
 
-  // Save to database
   const { error: updateError } = await supabase
     .from("users")
     .update({
-      cv_raw: cvRaw.trim(),
+      pref_industries: industries,
+      pref_excluded_industries: excludedIndustries,
+      pref_company_sizes: validSizes,
+      pref_excluded_companies: excludedCompanies,
+      pref_watchlist_companies: watchlistCompanies,
       updated_at: new Date().toISOString(),
     })
     .eq("id", user.id);
 
   if (updateError) {
-    console.error("Error saving CV:", updateError);
-    return { error: "Failed to save CV. Please try again." };
+    console.error("Error saving branche & unternehmen:", updateError);
+    return { error: "Speichern fehlgeschlagen. Bitte erneut versuchen." };
   }
 
   revalidatePath("/", "layout");
   redirect("/onboarding/step-3");
 }
-
-export type FinalDetailsState = {
-  error?: string;
-  success?: boolean;
-};
 
 export async function saveFinalDetails(
   prevState: FinalDetailsState,
@@ -139,7 +164,6 @@ export async function saveFinalDetails(
 ): Promise<FinalDetailsState> {
   const supabase = await createClient();
 
-  // Get authenticated user
   const {
     data: { user },
     error: authError,
@@ -149,20 +173,34 @@ export async function saveFinalDetails(
     redirect("/login");
   }
 
-  const summary = formData.get("summary") as string;
+  const languagesJson = formData.get("languages") as string;
+  const dealbreakersJson = formData.get("dealbreakers") as string;
+  const focusJson = formData.get("focus") as string;
   const notifyTimeStr = formData.get("notifyTime") as string;
   const notifyTime = parseInt(notifyTimeStr, 10);
 
-  // Validate notify time
-  if (isNaN(notifyTime) || notifyTime < 0 || notifyTime > 23) {
-    return { error: "Please select a valid notification time" };
+  let languages: string[] = [];
+  let dealbreakers: string[] = [];
+  let focus: string[] = [];
+
+  try {
+    languages = languagesJson ? JSON.parse(languagesJson) : [];
+    dealbreakers = dealbreakersJson ? JSON.parse(dealbreakersJson) : [];
+    focus = focusJson ? JSON.parse(focusJson) : [];
+  } catch {
+    return { error: "Invalid form data" };
   }
 
-  // Save to database
+  if (isNaN(notifyTime) || notifyTime < 0 || notifyTime > 23) {
+    return { error: "Bitte eine gültige Uhrzeit wählen" };
+  }
+
   const { error: updateError } = await supabase
     .from("users")
     .update({
-      summary: summary?.trim() || null,
+      pref_languages: languages,
+      pref_dealbreakers: dealbreakers,
+      pref_focus: focus,
       notify_time: notifyTime,
       is_active: true,
       onboarding_completed: true,
@@ -172,7 +210,7 @@ export async function saveFinalDetails(
 
   if (updateError) {
     console.error("Error saving final details:", updateError);
-    return { error: "Failed to save your details. Please try again." };
+    return { error: "Speichern fehlgeschlagen. Bitte erneut versuchen." };
   }
 
   revalidatePath("/", "layout");

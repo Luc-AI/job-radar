@@ -4,18 +4,43 @@ import { useActionState, useState } from "react";
 import { Loader } from "react-feather";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { TagInput } from "@/components/ui/TagInput";
 import { LocationInput } from "@/components/ui/LocationInput";
 import { saveJobPreferences, OnboardingState } from "../actions";
+import { cn } from "@/lib/utils";
+
+const WORK_MODES = [
+  { value: "onsite", label: "On-site" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "remote_ok", label: "Remote OK" },
+  { value: "remote_solely", label: "Remote Solely" },
+] as const;
+
+const SENIORITY_LEVELS = [
+  { value: "junior", label: "Junior" },
+  { value: "mid", label: "Mid-Level" },
+  { value: "senior", label: "Senior" },
+  { value: "lead", label: "Lead" },
+  { value: "clevel", label: "C-Level" },
+] as const;
 
 const initialState: OnboardingState = {};
 
 export default function OnboardingStep1Page() {
   const [roles, setRoles] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
-  const [remoteOk, setRemoteOk] = useState(false);
+  const [workModes, setWorkModes] = useState<string[]>([]);
+  const [seniorityLevels, setSeniorityLevels] = useState<string[]>([]);
+
+  const toggleItem = (
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    setter((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  };
 
   const [state, formAction, pending] = useActionState(
     saveJobPreferences,
@@ -27,8 +52,8 @@ export default function OnboardingStep1Page() {
       {/* Progress indicator */}
       <div className="mb-8">
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-          <span>Step 1 of 3</span>
-          <span>Job Preferences</span>
+          <span>Schritt 1 von 3</span>
+          <span>Rolle & Standort</span>
         </div>
         <div className="h-2 bg-secondary rounded-full overflow-hidden">
           <div
@@ -40,9 +65,9 @@ export default function OnboardingStep1Page() {
 
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">What jobs are you looking for?</CardTitle>
+          <CardTitle className="text-2xl">Rolle & Standort</CardTitle>
           <CardDescription>
-            Tell us about your ideal role so we can find the best matches.
+            Was suchst du und wo willst du arbeiten?
           </CardDescription>
         </CardHeader>
 
@@ -54,81 +79,106 @@ export default function OnboardingStep1Page() {
           )}
 
           <form action={formAction} className="space-y-6">
-          {/* Hidden fields for form data */}
-          <input type="hidden" name="roles" value={JSON.stringify(roles)} />
-          <input
-            type="hidden"
-            name="locations"
-            value={JSON.stringify(locations)}
-          />
-          <input
-            type="hidden"
-            name="remoteOk"
-            value={remoteOk ? "true" : "false"}
-          />
+            <input type="hidden" name="roles" value={JSON.stringify(roles)} />
+            <input type="hidden" name="locations" value={JSON.stringify(locations)} />
+            <input type="hidden" name="workModes" value={JSON.stringify(workModes)} />
+            <input type="hidden" name="seniorityLevels" value={JSON.stringify(seniorityLevels)} />
 
-          {/* Job titles/keywords */}
-          <div>
-            <TagInput
-              label="Target job titles or keywords"
-              placeholder="e.g., Product Manager, AI Engineer, Marketing Lead"
-              value={roles}
-              onChange={setRoles}
-              error={state.fieldErrors?.roles}
-              maxTags={10}
-            />
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              Add titles or keywords that describe the roles you&apos;re
-              interested in. Press Enter after each one.
-            </p>
-          </div>
-
-          {/* Locations */}
-          <div>
-            <LocationInput
-              label="Preferred locations"
-              placeholder="Search or type a city/country"
-              value={locations}
-              onChange={setLocations}
-              error={state.fieldErrors?.locations}
-              maxLocations={5}
-            />
-            <p className="mt-1.5 text-xs text-muted-foreground">
-              Add the cities or countries where you&apos;d like to work. You can
-              type custom locations or select from suggestions.
-            </p>
-          </div>
-
-          {/* Remote preference */}
-          <div className="flex items-center space-x-3 pt-2">
-            <Checkbox
-              id="remote-ok"
-              checked={remoteOk}
-              onCheckedChange={(checked) => setRemoteOk(checked === true)}
-            />
-            <div className="grid gap-1.5 leading-none">
-              <Label htmlFor="remote-ok" className="cursor-pointer">
-                Open to remote work
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Include fully remote positions in my matches
+            <div>
+              <TagInput
+                label="Rollen"
+                placeholder="z.B. Product Manager, AI Engineer"
+                value={roles}
+                onChange={setRoles}
+                error={state.fieldErrors?.roles}
+                maxTags={10}
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Job-Titel oder Keywords die deine Wunschrollen beschreiben.
               </p>
             </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex justify-end pt-6 border-t">
-            <Button type="submit" size="lg" disabled={pending}>
-              {pending ? (
-                <>
-                  <Loader className="animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Next"
-              )}
-            </Button>
-          </div>
+            <div>
+              <Label className="mb-3 block">Senioritätslevel</Label>
+              <div className="flex flex-wrap gap-2">
+                {SENIORITY_LEVELS.map((level) => {
+                  const isSelected = seniorityLevels.includes(level.value);
+                  return (
+                    <button
+                      key={level.value}
+                      type="button"
+                      onClick={() => toggleItem(level.value, setSeniorityLevels)}
+                      className={cn(
+                        "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                        isSelected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-foreground hover:bg-accent"
+                      )}
+                    >
+                      {level.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Mehrfachauswahl möglich. Leer lassen = keine Präferenz.
+              </p>
+            </div>
+
+            <div>
+              <LocationInput
+                label="Standorte"
+                placeholder="Stadt oder Land suchen"
+                value={locations}
+                onChange={setLocations}
+                error={state.fieldErrors?.locations}
+                maxLocations={5}
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Städte oder Länder in denen du arbeiten möchtest.
+              </p>
+            </div>
+
+            <div>
+              <Label className="mb-3 block">Arbeitsmodell</Label>
+              <div className="flex flex-wrap gap-2">
+                {WORK_MODES.map((mode) => {
+                  const isSelected = workModes.includes(mode.value);
+                  return (
+                    <button
+                      key={mode.value}
+                      type="button"
+                      onClick={() => toggleItem(mode.value, setWorkModes)}
+                      className={cn(
+                        "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                        isSelected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-foreground hover:bg-accent"
+                      )}
+                    >
+                      {mode.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Mehrfachauswahl möglich. Leer lassen = keine Präferenz.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end pt-6">
+              <Button type="submit" size="lg" disabled={pending}>
+                {pending ? (
+                  <>
+                    <Loader className="animate-spin" />
+                    Speichern...
+                  </>
+                ) : (
+                  "Weiter"
+                )}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

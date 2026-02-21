@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ProfileNav } from "./ProfileNav";
 import { BasicsForm } from "./BasicsForm";
 import { FirmaForm } from "./FirmaForm";
 import { AdvancedForm } from "./AdvancedForm";
@@ -44,29 +43,33 @@ export default async function ProfilePage() {
         </p>
       </div>
 
-      <ProfileNav />
-
       <div className="space-y-6">
-        <BasicsForm
-          initialRoles={userData?.pref_roles || []}
-          initialLocations={userData?.pref_locations || []}
-          initialWorkModes={userData?.pref_work_modes || []}
-          initialSeniorityLevels={userData?.pref_seniority_levels || []}
-        />
+        <div id="rolle-standort">
+          <BasicsForm
+            initialRoles={userData?.pref_roles || []}
+            initialLocations={userData?.pref_locations || []}
+            initialWorkModes={userData?.pref_work_modes || []}
+            initialSeniorityLevels={userData?.pref_seniority_levels || []}
+          />
+        </div>
 
-        <FirmaForm
-          initialIndustries={userData?.pref_industries || []}
-          initialExcludedIndustries={userData?.pref_excluded_industries || []}
-          initialCompanySizes={userData?.pref_company_sizes || []}
-          initialExcludedCompanies={userData?.pref_excluded_companies || []}
-          initialWatchlistCompanies={userData?.pref_watchlist_companies || []}
-        />
+        <div id="branche-unternehmen">
+          <FirmaForm
+            initialIndustries={userData?.pref_industries || []}
+            initialExcludedIndustries={userData?.pref_excluded_industries || []}
+            initialCompanySizes={userData?.pref_company_sizes || []}
+            initialExcludedCompanies={userData?.pref_excluded_companies || []}
+            initialWatchlistCompanies={userData?.pref_watchlist_companies || []}
+          />
+        </div>
 
-        <AdvancedForm
-          initialLanguages={userData?.pref_languages || []}
-          initialDealbreakers={toPrefArray(userData?.pref_dealbreakers)}
-          initialFocus={toPrefArray(userData?.pref_focus)}
-        />
+        <div id="erweitert">
+          <AdvancedForm
+            initialLanguages={userData?.pref_languages || []}
+            initialDealbreakers={toPrefArray(userData?.pref_dealbreakers)}
+            initialFocus={toPrefArray(userData?.pref_focus)}
+          />
+        </div>
       </div>
     </div>
   );

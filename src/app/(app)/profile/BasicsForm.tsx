@@ -185,7 +185,7 @@ export function BasicsForm({
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t">
+          <div className="flex justify-end gap-3 pt-6">
             {hasChanges && (
               <Button type="button" variant="outline" onClick={handleCancel}>
                 Abbrechen

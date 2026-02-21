@@ -3,9 +3,21 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, User, Bell, LogOut, MoreVertical } from "react-feather";
+import {
+  Briefcase,
+  User,
+  Bell,
+  LogOut,
+  MoreVertical,
+  ChevronRight,
+} from "react-feather";
 import { logout } from "@/app/(auth)/actions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,52 +34,89 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const navMain = [
-  {
-    title: "Jobs",
-    url: "/dashboard",
-    icon: Briefcase,
-  },
-  {
-    title: "Profile",
-    url: "/profile",
-    icon: User,
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Bell,
-  },
+const profileSubItems = [
+  { title: "Rolle & Standort", anchor: "rolle-standort" },
+  { title: "Branche & Unternehmen", anchor: "branche-unternehmen" },
+  { title: "Erweitert", anchor: "erweitert" },
 ];
 
 function NavMain() {
   const pathname = usePathname();
+  const isProfileActive = pathname === "/profile" || pathname.startsWith("/profile/");
 
   return (
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
-          {navMain.map((item) => {
-            const isActive =
-              pathname === item.url || pathname.startsWith(`${item.url}/`);
-            return (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={item.title}
-                  isActive={isActive}
-                >
-                  <Link href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </Link>
+          {/* Jobs */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              tooltip="Jobs"
+              isActive={pathname === "/dashboard" || pathname.startsWith("/dashboard/")}
+            >
+              <Link href="/dashboard">
+                <Briefcase />
+                <span>Jobs</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          {/* Profile with collapsible sub-items */}
+          <Collapsible asChild defaultOpen={isProfileActive} className="group/collapsible">
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton tooltip="Profile" isActive={isProfileActive}>
+                  <User />
+                  <span>Profile</span>
+                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  {profileSubItems.map((item) => (
+                    <SidebarMenuSubItem key={item.anchor}>
+                      <SidebarMenuSubButton asChild>
+                        <a
+                          href={`/profile#${item.anchor}`}
+                          onClick={(e) => {
+                            if (pathname === "/profile") {
+                              e.preventDefault();
+                              document
+                                .getElementById(item.anchor)
+                                ?.scrollIntoView({ behavior: "smooth" });
+                            }
+                          }}
+                        >
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
+
+          {/* Settings */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              tooltip="Settings"
+              isActive={pathname === "/settings" || pathname.startsWith("/settings/")}
+            >
+              <Link href="/settings">
+                <Bell />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
