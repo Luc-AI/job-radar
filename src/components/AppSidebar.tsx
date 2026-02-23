@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from "react-feather";
 import { logout } from "@/app/(auth)/actions";
+import { useDashboardNav } from "@/contexts/DashboardNavContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Collapsible,
@@ -32,6 +33,7 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -39,6 +41,14 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+
+const jobsSubItems = [
+  { title: "Saved", anchor: "saved", filterHref: "/dashboard?status=saved" },
+  { title: "Last 24h", anchor: "last-24h" },
+  { title: "Last 7 Days", anchor: "last-7d" },
+  { title: "Last 30 Days", anchor: "last-30d" },
+  { title: "Older", anchor: "older" },
+];
 
 const profileSubItems = [
   { title: "Rolle & Standort", anchor: "rolle-standort" },
@@ -48,35 +58,76 @@ const profileSubItems = [
 
 function NavMain() {
   const pathname = usePathname();
+  const { sections } = useDashboardNav();
+  const isJobsActive = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
   const isProfileActive = pathname === "/profile" || pathname.startsWith("/profile/");
 
   return (
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
-          {/* Jobs */}
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Jobs"
-              isActive={pathname === "/dashboard" || pathname.startsWith("/dashboard/")}
-            >
-              <Link href="/dashboard">
-                <Briefcase />
-                <span>Jobs</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {/* Jobs with collapsible sub-items */}
+          <Collapsible asChild defaultOpen={isJobsActive} className="group/collapsible">
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Jobs" isActive={isJobsActive}>
+                <Link href="/dashboard">
+                  <Briefcase />
+                  <span>Jobs</span>
+                </Link>
+              </SidebarMenuButton>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuAction showOnHover={false}>
+                  <ChevronRight className="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuAction>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  {jobsSubItems.map((item) => {
+                    const hasContent =
+                      item.filterHref ||
+                      sections === null ||
+                      sections[item.anchor as keyof typeof sections];
+                    return (
+                      <SidebarMenuSubItem key={item.anchor}>
+                        <SidebarMenuSubButton
+                          asChild
+                          className={!hasContent ? "opacity-40 pointer-events-none" : undefined}
+                        >
+                          <a
+                            href={item.filterHref ?? `/dashboard#${item.anchor}`}
+                            onClick={(e) => {
+                              if (!item.filterHref && pathname === "/dashboard") {
+                                e.preventDefault();
+                                document
+                                  .getElementById(item.anchor)
+                                  ?.scrollIntoView({ behavior: "smooth" });
+                              }
+                            }}
+                          >
+                            <span>{item.title}</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    );
+                  })}
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
 
           {/* Profile with collapsible sub-items */}
           <Collapsible asChild defaultOpen={isProfileActive} className="group/collapsible">
             <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip="Profile" isActive={isProfileActive}>
+              <SidebarMenuButton asChild tooltip="Profile" isActive={isProfileActive}>
+                <Link href="/profile">
                   <User />
                   <span>Profile</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
+                </Link>
+              </SidebarMenuButton>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuAction showOnHover={false}>
+                  <ChevronRight className="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                </SidebarMenuAction>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>

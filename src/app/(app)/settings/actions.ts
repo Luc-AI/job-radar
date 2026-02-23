@@ -9,6 +9,11 @@ export type NotificationSettingsState = {
   success?: boolean;
 };
 
+export type ThresholdSettingsState = {
+  error?: string;
+  success?: boolean;
+};
+
 export type AccountSettingsState = {
   error?: string;
   success?: boolean;
@@ -65,6 +70,47 @@ export async function updateNotificationSettings(
   }
 
   revalidatePath("/settings");
+
+  return { success: true };
+}
+
+export async function updateTopPickThreshold(
+  prevState: ThresholdSettingsState,
+  formData: FormData
+): Promise<ThresholdSettingsState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: "Not authenticated" };
+  }
+
+  const thresholdStr = formData.get("top_pick_threshold") as string;
+  const threshold = parseInt(thresholdStr, 10);
+
+  if (isNaN(threshold) || threshold < 70 || threshold > 100) {
+    return { error: "Threshold must be between 70 and 100" };
+  }
+
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({
+      top_pick_threshold: threshold,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("Error saving top pick threshold:", updateError);
+    return { error: "Failed to save settings. Please try again." };
+  }
+
+  revalidatePath("/settings");
+  revalidatePath("/dashboard");
 
   return { success: true };
 }

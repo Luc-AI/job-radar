@@ -15,12 +15,14 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { JobWithEvaluation, EvaluationStatus } from "@/types/database";
+import { JobWithEvaluation, EvaluationStatus, JobTier } from "@/types/database";
 import { updateJobStatus } from "@/app/(app)/jobs/[id]/actions";
 import { CompanyLogo } from "@/components/CompanyLogo";
 
 interface JobCardProps {
   evaluation: JobWithEvaluation;
+  /** Score-tier context: controls badge colour. Omit for score-based default colouring. */
+  tier?: JobTier;
 }
 
 const STATUS_MESSAGES: Record<EvaluationStatus, string> = {
@@ -31,23 +33,30 @@ const STATUS_MESSAGES: Record<EvaluationStatus, string> = {
   new: "Status reset",
 };
 
-function ScoreBadge({ score }: { score: number }) {
+function ScoreBadge({ score, tier }: { score: number; tier?: JobTier }) {
   const percentage = Math.round(score * 10);
 
-  // Color coding based on score using semantic-friendly classes
-  let variant: "default" | "secondary" | "outline" | "destructive" = "secondary";
+  // Tier-based colour overrides score-based colour when a tier is provided
   let className = "";
-
-  if (score >= 9) {
+  if (tier === "top") {
     className = "bg-green-100 text-green-800 border-green-200 hover:bg-green-100";
-  } else if (score >= 8) {
-    className = "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100";
-  } else if (score >= 7) {
-    className = "bg-sky-100 text-sky-800 border-sky-200 hover:bg-sky-100";
-  } else if (score >= 6) {
+  } else if (tier === "also") {
     className = "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100";
-  } else {
+  } else if (tier === "below") {
     className = "bg-muted text-muted-foreground border-border hover:bg-muted";
+  } else {
+    // Fallback: score-based colour (used when no tier context, e.g. job detail page)
+    if (score >= 9) {
+      className = "bg-green-100 text-green-800 border-green-200 hover:bg-green-100";
+    } else if (score >= 8) {
+      className = "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100";
+    } else if (score >= 7) {
+      className = "bg-sky-100 text-sky-800 border-sky-200 hover:bg-sky-100";
+    } else if (score >= 6) {
+      className = "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100";
+    } else {
+      className = "bg-muted text-muted-foreground border-border hover:bg-muted";
+    }
   }
 
   return (
@@ -108,7 +117,7 @@ function formatDate(dateString: string | null): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export function JobCard({ evaluation }: JobCardProps) {
+export function JobCard({ evaluation, tier }: JobCardProps) {
   const { job } = evaluation;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -180,7 +189,7 @@ export function JobCard({ evaluation }: JobCardProps) {
                 <p className="mt-0.5 text-sm text-muted-foreground">{job.company}</p>
               </div>
             </div>
-            <ScoreBadge score={evaluation.score_total} />
+            <ScoreBadge score={evaluation.score_total} tier={tier} />
           </div>
 
           {/* Meta: Location, Posted Date */}

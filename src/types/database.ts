@@ -70,3 +70,18 @@ export interface JobFilters {
 
 // Sort types for job dashboard
 export type SortOption = 'score_desc' | 'date_desc' | 'date_asc';
+
+// User settings type (subset of users table columns used in app)
+export interface UserSettings {
+  top_pick_threshold: number | null;
+  notify_enabled: boolean | null;
+  notify_frequency: string | null;
+  notify_threshold: number | null;
+  onboarding_completed: boolean | null;
+}
+
+// Time bucket for grouping jobs by creation date
+export type TimeBucket = 'last24h' | 'last7d' | 'last30d' | 'older';
+
+// Tier for score-based priority within a time bucket
+export type JobTier = 'top' | 'also' | 'below';

@@ -1,9 +1,11 @@
 import { AppSidebar } from "@/components/AppSidebar";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { DashboardNavProvider } from "@/contexts/DashboardNavContext";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
+    <DashboardNavProvider>
     <SidebarProvider
       style={
         {
@@ -19,5 +21,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </DashboardNavProvider>
   );
 }

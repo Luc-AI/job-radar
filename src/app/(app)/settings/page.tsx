@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { NotificationSettingsForm } from "./NotificationSettingsForm";
 import { AccountSettingsForm } from "./AccountSettingsForm";
+import { ThresholdSettingsForm } from "./ThresholdSettingsForm";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -14,10 +15,10 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
-  // Fetch current user notification settings
+  // Fetch current user settings
   const { data: userData, error } = await supabase
     .from("users")
-    .select("email, notify_enabled, notify_frequency, notify_threshold")
+    .select("email, notify_enabled, notify_frequency, notify_threshold, top_pick_threshold")
     .eq("id", user.id)
     .single();
 
@@ -30,6 +31,7 @@ export default async function SettingsPage() {
   const notifyEnabled = userData?.notify_enabled ?? true;
   const notifyFrequency = userData?.notify_frequency ?? "daily";
   const notifyThreshold = userData?.notify_threshold ?? 7.0;
+  const topPickThreshold = userData?.top_pick_threshold ?? 85;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -41,6 +43,8 @@ export default async function SettingsPage() {
       </div>
 
       <div className="space-y-8">
+        <ThresholdSettingsForm initialThreshold={topPickThreshold} />
+
         <NotificationSettingsForm
           email={email}
           initialNotifyEnabled={notifyEnabled}
