@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { NotificationSettingsForm } from "./NotificationSettingsForm";
+import { NotificationSettingsPageForm } from "./NotificationSettingsPageForm";
 import { AccountSettingsForm } from "./AccountSettingsForm";
-import { ThresholdSettingsForm } from "./ThresholdSettingsForm";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -18,7 +17,9 @@ export default async function SettingsPage() {
   // Fetch current user settings
   const { data: userData, error } = await supabase
     .from("users")
-    .select("email, notify_enabled, notify_frequency, notify_threshold, top_pick_threshold")
+    .select(
+      "email, notify_enabled, notify_frequency, notify_threshold, notify_time, notify_days, instant_alerts_enabled, instant_alert_threshold, instant_alert_channels"
+    )
     .eq("id", user.id)
     .single();
 
@@ -26,30 +27,25 @@ export default async function SettingsPage() {
     console.error("Error fetching user data:", error);
   }
 
-  // Default values
   const email = userData?.email || user.email || "";
-  const notifyEnabled = userData?.notify_enabled ?? true;
-  const notifyFrequency = userData?.notify_frequency ?? "daily";
-  const notifyThreshold = userData?.notify_threshold ?? 7.0;
-  const topPickThreshold = userData?.top_pick_threshold ?? 85;
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
-        <p className="mt-1 text-slate-600">
-          Manage your notifications and account
-        </p>
+        <h1 className="text-2xl font-semibold text-slate-900">Einstellungen</h1>
+        <p className="mt-1 text-slate-600">Verwalte deine Benachrichtigungen und deinen Account</p>
       </div>
 
       <div className="space-y-8">
-        <ThresholdSettingsForm initialThreshold={topPickThreshold} />
-
-        <NotificationSettingsForm
-          email={email}
-          initialNotifyEnabled={notifyEnabled}
-          initialNotifyFrequency={notifyFrequency}
-          initialNotifyThreshold={notifyThreshold}
+        <NotificationSettingsPageForm
+          initialNotifyEnabled={userData?.notify_enabled ?? true}
+          initialNotifyFrequency={userData?.notify_frequency ?? "daily"}
+          initialNotifyThreshold={userData?.notify_threshold ?? 75}
+          initialNotifyTime={userData?.notify_time ?? 9}
+          initialNotifyDays={userData?.notify_days ?? ["mon", "tue", "wed", "thu", "fri"]}
+          initialInstantEnabled={userData?.instant_alerts_enabled ?? true}
+          initialInstantThreshold={userData?.instant_alert_threshold ?? 85}
+          initialInstantChannels={userData?.instant_alert_channels ?? ["email"]}
         />
 
         <AccountSettingsForm email={email} />

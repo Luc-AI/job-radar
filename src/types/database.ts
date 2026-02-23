@@ -75,8 +75,13 @@ export type SortOption = 'score_desc' | 'date_desc' | 'date_asc';
 export interface UserSettings {
   top_pick_threshold: number | null;
   notify_enabled: boolean | null;
-  notify_frequency: string | null;
-  notify_threshold: number | null;
+  notify_frequency: string | null;          // 'daily' | 'weekly'
+  notify_threshold: number | null;          // 40–95 (integer %)
+  notify_time: number | null;               // 0–23 (hour)
+  notify_days: string[] | null;             // ['mon','tue',…]
+  instant_alerts_enabled: boolean | null;
+  instant_alert_threshold: number | null;   // 70–98
+  instant_alert_channels: string[] | null;  // ['email',…]
   onboarding_completed: boolean | null;
 }
 
