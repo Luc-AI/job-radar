@@ -23,6 +23,11 @@ export type FinalDetailsState = {
   success?: boolean;
 };
 
+export type CvState = {
+  error?: string;
+  success?: boolean;
+};
+
 const VALID_WORK_MODES = ["onsite", "hybrid", "remote_ok", "remote_solely"];
 const VALID_SENIORITY_LEVELS = ["junior", "mid", "senior", "lead", "clevel"];
 const VALID_COMPANY_SIZES = [
@@ -156,6 +161,41 @@ export async function saveBrancheUnternehmen(
 
   if (updateError) {
     console.error("Error saving branche & unternehmen:", updateError);
+    return { error: "Speichern fehlgeschlagen. Bitte erneut versuchen." };
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/onboarding/cv");
+}
+
+export async function saveOnboardingCv(
+  prevState: CvState,
+  formData: FormData
+): Promise<CvState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    redirect("/login");
+  }
+
+  const cvText = (formData.get("cvText") as string)?.trim() ?? "";
+
+  if (!cvText) {
+    return { error: "Bitte CV-Text eingeben oder Datei hochladen." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({ cv_raw: cvText, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  if (updateError) {
+    console.error("Error saving CV:", updateError);
     return { error: "Speichern fehlgeschlagen. Bitte erneut versuchen." };
   }
 

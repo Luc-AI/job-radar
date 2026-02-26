@@ -22,6 +22,39 @@ export type AdvancedState = {
   success?: boolean;
 };
 
+export type CvState = {
+  error?: string;
+  success?: boolean;
+};
+
+
+export async function updateCV(
+  prevState: CvState,
+  formData: FormData
+): Promise<CvState> {
+  const auth = await getAuthenticatedUser();
+  if (!auth) return { error: "Not authenticated" };
+
+  const cvText = (formData.get("cvText") as string)?.trim() ?? "";
+
+  if (!cvText) {
+    return { error: "CV-Text darf nicht leer sein." };
+  }
+
+  const { error: updateError } = await auth.supabase
+    .from("users")
+    .update({ cv_raw: cvText, updated_at: new Date().toISOString() })
+    .eq("id", auth.user.id);
+
+  if (updateError) {
+    console.error("Error saving CV:", updateError);
+    return { error: "Failed to save. Please try again." };
+  }
+
+  revalidatePath("/profile");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
 
 async function getAuthenticatedUser() {
   const supabase = await createClient();

@@ -1,9 +1,11 @@
 -- Convert notify_threshold from DECIMAL(3,1) 1–10 scale to INTEGER 40–95 percentage
+-- Drop old constraint FIRST, before altering the column type
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_notify_threshold_check;
+
 ALTER TABLE users
   ALTER COLUMN notify_threshold TYPE INTEGER
-  USING ROUND(notify_threshold * 10)::INTEGER;
+  USING GREATEST(40, LEAST(95, ROUND(notify_threshold * 10)::INTEGER));
 
-ALTER TABLE users DROP CONSTRAINT IF EXISTS users_notify_threshold_check;
 ALTER TABLE users ADD CONSTRAINT users_notify_threshold_check
   CHECK (notify_threshold >= 40 AND notify_threshold <= 95);
 ALTER TABLE users ALTER COLUMN notify_threshold SET DEFAULT 75;

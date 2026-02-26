@@ -31,12 +31,12 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-slate-900">Einstellungen</h1>
-        <p className="mt-1 text-slate-600">Verwalte deine Benachrichtigungen und deinen Account</p>
+      <div className="mb-2">
+        <h1 className="text-2xl font-semibold">Einstellungen</h1>
+        <p className="mt-1 text-muted-foreground">Verwalte deine Benachrichtigungen und deinen Account</p>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         <NotificationSettingsPageForm
           initialNotifyEnabled={userData?.notify_enabled ?? true}
           initialNotifyFrequency={userData?.notify_frequency ?? "daily"}

@@ -51,7 +51,7 @@ function EmailEditForm({
   return (
     <form action={emailAction} className="space-y-3">
       <p className="text-sm text-muted-foreground mb-2">
-        Current email: {currentEmail}
+        Aktuelle E-Mail: {currentEmail}
       </p>
       <div className="space-y-2">
         <Input
@@ -59,7 +59,7 @@ function EmailEditForm({
           name="email"
           value={newEmail}
           onChange={(e) => setNewEmail(e.target.value)}
-          placeholder="Enter new email address"
+          placeholder="Neue E-Mail-Adresse"
           aria-invalid={!!emailState.error}
         />
         {emailState.error && (
@@ -73,7 +73,7 @@ function EmailEditForm({
           size="sm"
           onClick={onCancel}
         >
-          Cancel
+          Abbrechen
         </Button>
         <Button
           type="submit"
@@ -83,10 +83,10 @@ function EmailEditForm({
           {emailPending ? (
             <>
               <Loader className="animate-spin" />
-              Updating...
+              Aktualisieren...
             </>
           ) : (
-            "Update Email"
+            "E-Mail aktualisieren"
           )}
         </Button>
       </div>
@@ -132,18 +132,18 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Account Settings</CardTitle>
-          <CardDescription>Manage your email and account.</CardDescription>
+          <CardTitle>Account</CardTitle>
+          <CardDescription>Verwalte deine E-Mail-Adresse und deinen Account.</CardDescription>
         </CardHeader>
 
         <CardContent>
           {/* Email Section */}
           <div className="space-y-4">
             <div>
-              <Label className="mb-1 block">Email address</Label>
+              <Label className="mb-1 block">E-Mail-Adresse</Label>
               {!isEditingEmail ? (
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 px-3 py-2 rounded-lg border bg-muted text-muted-foreground">
+                  <div className="flex-1 px-3 py-2 rounded-md border bg-muted text-muted-foreground text-sm">
                     {email}
                   </div>
                   <Button
@@ -152,7 +152,7 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
                     size="sm"
                     onClick={() => setIsEditingEmail(true)}
                   >
-                    Change
+                    Ändern
                   </Button>
                 </div>
               ) : (
@@ -168,14 +168,14 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
           <div className="mt-8 pt-6 border-t">
             <h3 className="text-sm font-medium text-destructive mb-2">Danger Zone</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Once you delete your account, there is no going back. All your data will be permanently removed.
+              Das Löschen deines Accounts kann nicht rückgängig gemacht werden. Alle deine Daten werden dauerhaft entfernt.
             </p>
             <Button
               type="button"
               variant="destructive"
               onClick={handleOpenDeleteModal}
             >
-              Delete Account
+              Account löschen
             </Button>
           </div>
         </CardContent>
@@ -185,23 +185,23 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Account</DialogTitle>
+            <DialogTitle>Account löschen</DialogTitle>
             <DialogDescription>
-              This action cannot be undone.
+              Diese Aktion kann nicht rückgängig gemacht werden.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
               <p className="text-sm text-destructive">
-                This action is permanent and cannot be undone. All your data, including your profile, job evaluations, and preferences will be deleted.
+                Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden. Alle deine Daten, einschliesslich Profil, Job-Bewertungen und Präferenzen, werden gelöscht.
               </p>
             </div>
 
             <form action={deleteAction} className="space-y-4">
               <div className="space-y-2">
                 <Label>
-                  Type <span className="font-mono font-bold">DELETE</span> to confirm
+                  Tippe <span className="font-mono font-bold">DELETE</span> zur Bestätigung
                 </Label>
                 <Input
                   type="text"
@@ -223,7 +223,7 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
                   variant="outline"
                   onClick={handleCloseDeleteModal}
                 >
-                  Cancel
+                  Abbrechen
                 </Button>
                 <Button
                   type="submit"
@@ -233,10 +233,10 @@ export function AccountSettingsForm({ email }: AccountSettingsFormProps) {
                   {deletePending ? (
                     <>
                       <Loader className="animate-spin" />
-                      Deleting...
+                      Löschen...
                     </>
                   ) : (
-                    "Delete My Account"
+                    "Account löschen"
                   )}
                 </Button>
               </div>

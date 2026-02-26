@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { BasicsForm } from "./BasicsForm";
 import { FirmaForm } from "./FirmaForm";
 import { AdvancedForm } from "./AdvancedForm";
+import { CvForm } from "./CvForm";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -18,7 +19,7 @@ export default async function ProfilePage() {
   const { data: userData, error } = await supabase
     .from("users")
     .select(
-      "pref_roles, pref_locations, pref_work_modes, pref_seniority_levels, pref_industries, pref_excluded_industries, pref_dealbreakers, pref_focus, pref_company_sizes, pref_excluded_companies, pref_watchlist_companies, pref_languages"
+      "pref_roles, pref_locations, pref_work_modes, pref_seniority_levels, pref_industries, pref_excluded_industries, pref_dealbreakers, pref_focus, pref_company_sizes, pref_excluded_companies, pref_watchlist_companies, pref_languages, cv_raw"
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -69,6 +70,10 @@ export default async function ProfilePage() {
             initialDealbreakers={toPrefArray(userData?.pref_dealbreakers)}
             initialFocus={toPrefArray(userData?.pref_focus)}
           />
+        </div>
+
+        <div id="lebenslauf">
+          <CvForm initialCvText={userData?.cv_raw ?? ""} />
         </div>
       </div>
     </div>

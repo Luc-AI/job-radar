@@ -133,7 +133,7 @@ export function NotificationSettingsPageForm({
           <CardTitle>Such-Modus</CardTitle>
           <CardDescription>Wie intensiv suchst du gerade?</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           {/* Mode presets */}
           <div className="space-y-2">
             {SEARCH_MODES.map((mode) => {
@@ -170,12 +170,12 @@ export function NotificationSettingsPageForm({
             })}
           </div>
 
-          <Separator className="border-dashed" />
+          <Separator className="border-dashed my-1" />
 
           {/* Manual slider */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Schwellenwert manuell anpassen</span>
+              <span className="text-sm text-muted-foreground">oder Schwellenwert manuell anpassen</span>
               <span className={`text-sm font-mono font-semibold px-2 py-0.5 rounded ${
                 isCustom ? "bg-accent text-foreground" : "text-muted-foreground"
               }`}>
@@ -425,7 +425,10 @@ export function NotificationSettingsPageForm({
       {/* ── Save Button ── */}
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? (
-          <Loader className="size-4 animate-spin" />
+          <>
+            <Loader className="size-4 animate-spin" />
+            Einstellungen speichern...
+          </>
         ) : (
           "Einstellungen speichern"
         )}
