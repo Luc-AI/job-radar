@@ -2,26 +2,29 @@
 
 import { useState, KeyboardEvent, forwardRef, useRef, useEffect } from "react";
 
-// Common locations for suggestions
-const POPULAR_LOCATIONS = [
+// Curated international fallback list — shown when input is empty or API is unavailable.
+// All entries use "City, Country" format; "Remote" is the only exception.
+const FALLBACK_LOCATIONS = [
   "Remote",
-  "San Francisco, CA",
-  "New York, NY",
-  "London, UK",
   "Berlin, Germany",
-  "Toronto, Canada",
-  "Austin, TX",
-  "Seattle, WA",
-  "Los Angeles, CA",
-  "Chicago, IL",
-  "Boston, MA",
-  "Denver, CO",
-  "Amsterdam, Netherlands",
-  "Paris, France",
-  "Sydney, Australia",
-  "Singapore",
-  "Dublin, Ireland",
+  "Munich, Germany",
+  "Vienna, Austria",
   "Zurich, Switzerland",
+  "Amsterdam, Netherlands",
+  "London, United Kingdom",
+  "Paris, France",
+  "Stockholm, Sweden",
+  "Barcelona, Spain",
+  "Dublin, Ireland",
+  "Copenhagen, Denmark",
+  "Helsinki, Finland",
+  "Toronto, Canada",
+  "New York City, United States",
+  "San Francisco, United States",
+  "Singapore, Singapore",
+  "Sydney, Australia",
+  "Tokyo, Japan",
+  "Dubai, United Arab Emirates",
 ];
 
 interface LocationInputProps {
@@ -47,13 +50,63 @@ const LocationInput = forwardRef<HTMLInputElement, LocationInputProps>(
   ) => {
     const [inputValue, setInputValue] = useState("");
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [apiSuggestions, setApiSuggestions] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
-    const filteredSuggestions = POPULAR_LOCATIONS.filter(
+    const filteredFallback = FALLBACK_LOCATIONS.filter(
       (loc) =>
         loc.toLowerCase().includes(inputValue.toLowerCase()) &&
         !value.includes(loc)
     );
+
+    // API-backed suggestions when input ≥ 2 chars; fall back to filteredFallback on error
+    const displayedSuggestions =
+      inputValue.length >= 2 && !isLoading && apiSuggestions.length > 0
+        ? apiSuggestions.filter((loc) => !value.includes(loc))
+        : filteredFallback;
+
+    // Debounced geocode fetch
+    useEffect(() => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+
+      if (inputValue.length < 2) {
+        setApiSuggestions([]);
+        setIsLoading(false);
+        return;
+      }
+
+      debounceTimerRef.current = setTimeout(async () => {
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        setIsLoading(true);
+
+        try {
+          const res = await fetch(
+            `/api/geocode?q=${encodeURIComponent(inputValue)}`,
+            { signal: controller.signal }
+          );
+          if (res.ok) {
+            const data: string[] = await res.json();
+            setApiSuggestions(data);
+          } else {
+            setApiSuggestions([]);
+          }
+        } catch {
+          // AbortError or network failure — silently fall back to static list
+          setApiSuggestions([]);
+        } finally {
+          setIsLoading(false);
+        }
+      }, 300);
+
+      return () => {
+        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      };
+    }, [inputValue]);
 
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -88,12 +141,16 @@ const LocationInput = forwardRef<HTMLInputElement, LocationInputProps>(
         onChange([...value, trimmed]);
         setInputValue("");
         setShowSuggestions(false);
+        setApiSuggestions([]);
       }
     };
 
     const removeLocation = (index: number) => {
       onChange(value.filter((_, i) => i !== index));
     };
+
+    const showDropdown =
+      showSuggestions && (isLoading || displayedSuggestions.length > 0);
 
     return (
       <div className="w-full" ref={containerRef}>
@@ -176,17 +233,12 @@ const LocationInput = forwardRef<HTMLInputElement, LocationInputProps>(
           </div>
 
           {/* Suggestions dropdown */}
-          {showSuggestions && filteredSuggestions.length > 0 && (
+          {showDropdown && (
             <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-              {filteredSuggestions.slice(0, 8).map((suggestion) => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  onClick={() => addLocation(suggestion)}
-                  className="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none flex items-center gap-2"
-                >
+              {isLoading ? (
+                <div className="flex items-center gap-2 px-3 py-2.5 text-sm text-slate-400">
                   <svg
-                    className="w-4 h-4 text-slate-400"
+                    className="w-4 h-4 animate-spin"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -195,18 +247,42 @@ const LocationInput = forwardRef<HTMLInputElement, LocationInputProps>(
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                     />
                   </svg>
-                  {suggestion}
-                </button>
-              ))}
+                  Searching…
+                </div>
+              ) : (
+                displayedSuggestions.slice(0, 8).map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => addLocation(suggestion)}
+                    className="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none flex items-center gap-2"
+                  >
+                    <svg
+                      className="w-4 h-4 text-slate-400 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    {suggestion}
+                  </button>
+                ))
+              )}
             </div>
           )}
         </div>

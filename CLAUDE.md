@@ -108,6 +108,7 @@ npm install
 - App runtime (`.env.local`):
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `GEOAPIFY_API_KEY` (server-only; for location autocomplete via `/api/geocode`)
 - E2E tests (`tests/.env` and/or `.env.local` fallback):
   - `BASE_URL` (optional, default `http://localhost:3000`)
   - `SUPABASE_URL` (or use `NEXT_PUBLIC_SUPABASE_URL`)
@@ -295,3 +296,57 @@ npx playwright test --project=mobile
 ## Project-Specific Notes
 - Existing persistent instruction: use `react-feather` for icons across app/UI components.
 - Existing persistent instruction: consult shadcn MCP tools before major UI component changes.
+
+## UX Patterns
+
+### Per-Card Save Button Pattern
+**Every settings/profile card that contains a form MUST have its own Save and Cancel buttons — NOT a single save button for the whole page.**
+
+This pattern is established on the Profile page (`BasicsForm`, `FirmaForm`, etc.) and the Settings page (`SearchModeCard`, `NotificationChannelsCard`, `InstantAlertsCard`) and the Account page (`AccountPersonalForm`).
+
+Implementation template:
+```tsx
+"use client";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Loader } from "react-feather";
+
+const initialState: CardState = {};
+
+export function MyCard({ initialValue }: Props) {
+  const [value, setValue] = useState(initialValue);
+  const hasChanges = value !== initialValue;
+  const handleCancel = () => setValue(initialValue);
+
+  const [state, formAction, pending] = useActionState(myAction, initialState);
+  const prevStateRef = useRef(state);
+
+  useEffect(() => {
+    if (state.success && !prevStateRef.current.success) toast.success("Gespeichert");
+    if (state.error && state.error !== prevStateRef.current.error) toast.error(state.error);
+    prevStateRef.current = state;
+  }, [state]);
+
+  return (
+    <Card>
+      <CardContent>
+        <form action={formAction}>
+          {/* ...fields... */}
+          <div className="flex justify-end gap-3 pt-6">
+            {hasChanges && <Button type="button" variant="outline" onClick={handleCancel}>Abbrechen</Button>}
+            <Button type="submit" disabled={pending || !hasChanges}>
+              {pending ? <><Loader className="size-4 animate-spin" /> Speichern...</> : "Speichern"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+Rules:
+- Save button: `disabled={pending || !hasChanges}` — never enabled when nothing changed
+- Cancel button: only rendered when `hasChanges === true`, resets all fields to initial values
+- Success/error feedback: `toast.success` / `toast.error` via `useEffect` with `prevStateRef` guard to prevent duplicate toasts
+- Button alignment: `flex justify-end gap-3 pt-6` inside the form
