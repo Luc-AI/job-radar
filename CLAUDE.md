@@ -3,7 +3,7 @@
 ## 1. Project Overview
 - `job-radar` is a Next.js App Router web app for AI-assisted job matching (`Jobfishing` brand in UI copy).
 - Users sign up, complete onboarding (preferences + CV + digest time), then review scored job matches and manage status (`new`, `saved`, `applied`, `hidden`).
-- Current status: active MVP in development (full app flows + E2E tests, but deployment/CI not wired in repo).
+- Current status: active MVP in production. Deployed on Vercel via GitHub main branch auto-deploy.
 
 ## 2. Tech Stack
 - Language(s) and version(s)
@@ -22,8 +22,8 @@
 - Supabase Auth for user identity.
 
 - Hosting / deployment platform
-- No deployment config checked in (`.github/workflows`, `vercel.json`, `Dockerfile`, `docker-compose` are absent).
-- App is structured as a standard Next.js app and can be deployed on any Next-compatible platform.
+- Deployed on Vercel. GitHub push to `main` triggers automatic production deployment.
+- No `vercel.json` needed — Vercel auto-detects Next.js.
 
 - External APIs and services
 - Supabase project APIs (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`).
@@ -143,8 +143,7 @@ npm run lint
 ```
 
 - Deployment pipeline / process
-- Not automated in-repo yet.
-- Current deploy process must be handled manually outside repo.
+- Push to `main` → Vercel auto-deploys to production.
 
 - Environments
 - Local development via `.env.local`.
@@ -152,7 +151,7 @@ npm run lint
 - No repo-defined staging/prod pipeline.
 
 - CI/CD configuration
-- None checked in (`.github/workflows` absent).
+- Vercel Git integration on `main` branch. No GitHub Actions configured.
 
 ## 7. Key Commands
 ```bash
