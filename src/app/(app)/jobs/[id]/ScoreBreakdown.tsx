@@ -54,18 +54,18 @@ export function ScoreBreakdown({ evaluation }: ScoreBreakdownProps) {
   ];
 
   const getScoreTextColor = (score: number) => {
-    if (score >= 9) return "text-green-700";
-    if (score >= 8) return "text-blue-700";
-    if (score >= 7) return "text-sky-700";
-    if (score >= 6) return "text-amber-700";
+    if (score >= 90) return "text-green-700";
+    if (score >= 80) return "text-blue-700";
+    if (score >= 70) return "text-sky-700";
+    if (score >= 60) return "text-amber-700";
     return "text-muted-foreground";
   };
 
   const getProgressColor = (score: number) => {
-    if (score >= 9) return "[&>div]:bg-green-500";
-    if (score >= 8) return "[&>div]:bg-blue-500";
-    if (score >= 7) return "[&>div]:bg-sky-500";
-    if (score >= 6) return "[&>div]:bg-amber-500";
+    if (score >= 90) return "[&>div]:bg-green-500";
+    if (score >= 80) return "[&>div]:bg-blue-500";
+    if (score >= 70) return "[&>div]:bg-sky-500";
+    if (score >= 60) return "[&>div]:bg-amber-500";
     return "[&>div]:bg-muted-foreground";
   };
 
@@ -103,7 +103,7 @@ export function ScoreBreakdown({ evaluation }: ScoreBreakdownProps) {
         <div className="space-y-3">
           {dimensions.map((dimension) => {
             if (dimension.score === null) return null;
-            const percentage = Math.round(dimension.score * 10);
+            const percentage = Math.round(dimension.score);
 
             return (
               <div key={dimension.key} className="space-y-1.5">

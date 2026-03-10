@@ -1,8 +1,8 @@
 import { JobWithEvaluation, TimeBucket, JobTier } from "@/types/database";
 
-/** Convert a percentage threshold (70–100) to DB score scale (0–10). */
+/** Convert a percentage threshold (70–100) to DB score scale (0–100). */
 export function pctToScore(pct: number): number {
-  return pct / 10;
+  return pct;
 }
 
 /** Assign a job to a time bucket based on its created_at timestamp. */
@@ -29,13 +29,13 @@ export interface TieredJobs {
 }
 
 /**
- * Split jobs into three tiers given a 0–10 threshold score T:
+ * Split jobs into three tiers given a 0–100 threshold score T:
  *   top:   score ≥ T
- *   also:  score ≥ (T − 1.5) AND score < T
- *   below: score < (T − 1.5)
+ *   also:  score ≥ (T − 15) AND score < T
+ *   below: score < (T − 15)
  */
 export function splitByTier(jobs: JobWithEvaluation[], thresholdScore: number): TieredJobs {
-  const alsoMin = thresholdScore - 1.5;
+  const alsoMin = thresholdScore - 15;
   const top: JobWithEvaluation[] = [];
   const also: JobWithEvaluation[] = [];
   const below: JobWithEvaluation[] = [];
@@ -89,10 +89,10 @@ export function bucketAndTier(
   };
 }
 
-/** Return the tier a job belongs to given a threshold (0–10 scale). */
+/** Return the tier a job belongs to given a threshold (0–100 scale). */
 export function getJobTier(score: number, thresholdScore: number): JobTier {
   if (score >= thresholdScore) return "top";
-  if (score >= thresholdScore - 1.5) return "also";
+  if (score >= thresholdScore - 15) return "also";
   return "below";
 }
 

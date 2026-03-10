@@ -80,20 +80,20 @@ export async function seedTestData(userId: string): Promise<SeedResult> {
       }
       result.jobsCreated++;
 
-      // Calculate component scores (database uses 1-10 scale)
-      const baseScore = config.score / 10; // Convert 0-100 to 1-10 scale
-      const variance = 0.5;
+      // Calculate component scores (database uses 1-100 scale)
+      const baseScore = config.score; // Already 1-100 scale
+      const variance = 5;
 
       const evaluation: Evaluation = {
         uuid_evaluation: faker.string.uuid(),
         user_id: userId,
         fingerprint_job: fingerprint,
-        score_total: baseScore, // 1-10 scale
-        score_role: Math.min(10, Math.max(1, baseScore + faker.number.float({ min: -variance, max: variance }))),
-        score_company: Math.min(10, Math.max(1, baseScore + faker.number.float({ min: -variance, max: variance }))),
-        score_location: Math.min(10, Math.max(1, baseScore + faker.number.float({ min: -variance, max: variance }))),
-        score_industry: Math.min(10, Math.max(1, baseScore + faker.number.float({ min: -variance, max: variance }))),
-        score_growth: Math.min(10, Math.max(1, baseScore + faker.number.float({ min: -variance, max: variance }))),
+        score_total: baseScore,
+        score_role: Math.min(100, Math.max(1, Math.round(baseScore + faker.number.float({ min: -variance, max: variance })))),
+        score_company: Math.min(100, Math.max(1, Math.round(baseScore + faker.number.float({ min: -variance, max: variance })))),
+        score_location: Math.min(100, Math.max(1, Math.round(baseScore + faker.number.float({ min: -variance, max: variance })))),
+        score_industry: Math.min(100, Math.max(1, Math.round(baseScore + faker.number.float({ min: -variance, max: variance })))),
+        score_growth: Math.min(100, Math.max(1, Math.round(baseScore + faker.number.float({ min: -variance, max: variance })))),
         reason_overall: generateReason("overall", config.title, config.company, config.score),
         reason_role: generateReason("role", config.title, config.company, config.score),
         reason_company: generateReason("company", config.title, config.company, config.score),
@@ -174,7 +174,7 @@ export async function ensureUserProfile(
       pref_excluded_companies: [],
       pref_remote: true,
       notify_enabled: true,
-      notify_threshold: 7.0,
+      notify_threshold: 75,
       notify_frequency: "daily",
     },
     { onConflict: "id" }

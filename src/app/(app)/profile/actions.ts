@@ -47,7 +47,7 @@ export async function updateCV(
     .eq("id", auth.user.id);
 
   if (updateError) {
-    console.error("Error saving CV:", updateError);
+    if (process.env.NODE_ENV === "development") console.error("Error saving CV:", updateError);
     return { error: "Failed to save. Please try again." };
   }
 
@@ -110,7 +110,7 @@ export async function updateBasics(
     .eq("id", auth.user.id);
 
   if (updateError) {
-    console.error("Error saving basics:", updateError);
+    if (process.env.NODE_ENV === "development") console.error("Error saving basics:", updateError);
     return { error: "Failed to save. Please try again." };
   }
 
@@ -170,7 +170,7 @@ export async function updateBrancheUnternehmen(
     .eq("id", auth.user.id);
 
   if (updateError) {
-    console.error("Error saving branche & unternehmen:", updateError);
+    if (process.env.NODE_ENV === "development") console.error("Error saving branche & unternehmen:", updateError);
     return { error: "Failed to save. Please try again." };
   }
 
@@ -213,7 +213,7 @@ export async function updateAdvanced(
     .eq("id", auth.user.id);
 
   if (updateError) {
-    console.error("Error saving advanced preferences:", updateError);
+    if (process.env.NODE_ENV === "development") console.error("Error saving advanced preferences:", updateError);
     return { error: "Failed to save. Please try again." };
   }
 

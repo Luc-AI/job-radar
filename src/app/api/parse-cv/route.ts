@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ text, fileName: file.name });
   } catch (error) {
-    console.error("Error parsing CV:", error);
+    if (process.env.NODE_ENV === "development") console.error("Error parsing CV:", error);
     return NextResponse.json(
       { error: "Failed to parse file. Please try another file or paste your CV directly." },
       { status: 500 }

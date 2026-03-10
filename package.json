@@ -16,6 +16,7 @@
     "test:report": "playwright show-report"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.42.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.94.1",
     "class-variance-authority": "^0.7.1",

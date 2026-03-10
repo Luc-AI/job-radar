@@ -73,6 +73,8 @@ export type SortOption = 'score_desc' | 'date_desc' | 'date_asc';
 
 // User settings type (subset of users table columns used in app)
 export interface UserSettings {
+  first_name: string | null;
+  last_name: string | null;
   top_pick_threshold: number | null;
   notify_enabled: boolean | null;
   notify_frequency: string | null;          // 'daily' | 'weekly'

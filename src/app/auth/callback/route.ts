@@ -1,14 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+// Allowlist of valid post-auth redirect destinations
+const ALLOWED_NEXT_PATHS = ["/reset-password", "/dashboard", "/onboarding/step-1"];
+
+function getSafeRedirectPath(next: string | null): string {
+  if (!next) return "/onboarding/step-1";
+  // Must start with / and not contain a protocol or double-slash (open redirect guard)
+  if (!next.startsWith("/") || next.startsWith("//") || next.includes(":")) {
+    return "/onboarding/step-1";
+  }
+  // Only allow known destinations
+  const isAllowed = ALLOWED_NEXT_PATHS.some((p) => next === p || next.startsWith(`${p}?`));
+  return isAllowed ? next : "/onboarding/step-1";
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  const host = forwardedHost || new URL(request.url).host;
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const origin = `${protocol}://${host}`;
+  // Use NEXT_PUBLIC_SITE_URL env var for the canonical origin, never trust x-forwarded-host
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const requestUrl = new URL(request.url);
+  const origin = siteUrl || `${requestUrl.protocol}//${requestUrl.host}`;
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/onboarding/step-1";
+  const next = getSafeRedirectPath(searchParams.get("next"));
 
   if (code) {
     const supabase = await createClient();

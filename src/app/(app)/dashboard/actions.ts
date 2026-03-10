@@ -13,13 +13,13 @@ import {
 function getScoreRangeBounds(range: ScoreRange): { min: number; max: number } {
   switch (range) {
     case "90+":
-      return { min: 9, max: 10 };
+      return { min: 90, max: 100 };
     case "80-89":
-      return { min: 8, max: 8.99 };
+      return { min: 80, max: 89 };
     case "70-79":
-      return { min: 7, max: 7.99 };
+      return { min: 70, max: 79 };
     case "below70":
-      return { min: 0, max: 6.99 };
+      return { min: 0, max: 69 };
   }
 }
 
@@ -86,7 +86,7 @@ export async function loadMoreJobs(
   );
 
   if (error) {
-    console.error("Error loading more jobs:", error);
+    if (process.env.NODE_ENV === "development") console.error("Error loading more jobs:", error);
     return [];
   }
 
@@ -179,7 +179,7 @@ export async function getFilteredJobCount(
   const { data, error } = await query;
 
   if (error) {
-    console.error("Error getting filtered count:", error);
+    if (process.env.NODE_ENV === "development") console.error("Error getting filtered count:", error);
     return { filteredCount: 0, totalCount: totalCount || 0 };
   }
 

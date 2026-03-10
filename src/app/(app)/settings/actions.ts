@@ -1,199 +1,134 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export type NotificationSettingsState = {
+export type CardState = {
   error?: string;
   success?: boolean;
 };
 
-export type NotificationPageState = {
-  error?: string;
-  success?: boolean;
-};
+// ── Search Mode ──────────────────────────────────────────────────────────────
 
-export type ThresholdSettingsState = {
-  error?: string;
-  success?: boolean;
-};
-
-export type AccountSettingsState = {
-  error?: string;
-  success?: boolean;
-  message?: string;
-};
-
-export async function updateNotificationSettings(
-  prevState: NotificationSettingsState,
+export async function saveSearchMode(
+  prevState: CardState,
   formData: FormData
-): Promise<NotificationSettingsState> {
+): Promise<CardState> {
   const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { error: "Not authenticated" };
 
-  // Get authenticated user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { error: "Not authenticated" };
+  const threshold = parseInt(formData.get("notify_threshold") as string, 10);
+  if (isNaN(threshold) || threshold < 40 || threshold > 95) {
+    return { error: "Schwellenwert muss zwischen 40 und 95 liegen" };
   }
 
-  // Parse form data
-  const notifyEnabled = formData.get("notifyEnabled") === "true";
-  const notifyFrequency = formData.get("notifyFrequency") as string;
-  const notifyThresholdStr = formData.get("notifyThreshold") as string;
-
-  const notifyThreshold = parseFloat(notifyThresholdStr);
-
-  // Validate notify_frequency
-  if (!["daily", "weekly"].includes(notifyFrequency)) {
-    return { error: "Invalid digest frequency selected" };
-  }
-
-  // Validate notify_threshold (1-10)
-  if (isNaN(notifyThreshold) || notifyThreshold < 1 || notifyThreshold > 10) {
-    return { error: "Invalid score threshold selected" };
-  }
-
-  // Save to database
-  const { error: updateError } = await supabase
+  const { error } = await supabase
     .from("users")
-    .update({
-      notify_enabled: notifyEnabled,
-      notify_frequency: notifyFrequency,
-      notify_threshold: notifyThreshold,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ notify_threshold: threshold, updated_at: new Date().toISOString() })
     .eq("id", user.id);
 
-  if (updateError) {
-    console.error("Error saving notification settings:", updateError);
-    return { error: "Failed to save settings. Please try again." };
-  }
-
-  revalidatePath("/settings");
-
-  return { success: true };
-}
-
-export async function updateTopPickThreshold(
-  prevState: ThresholdSettingsState,
-  formData: FormData
-): Promise<ThresholdSettingsState> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { error: "Not authenticated" };
-  }
-
-  const thresholdStr = formData.get("top_pick_threshold") as string;
-  const threshold = parseInt(thresholdStr, 10);
-
-  if (isNaN(threshold) || threshold < 70 || threshold > 100) {
-    return { error: "Threshold must be between 70 and 100" };
-  }
-
-  const { error: updateError } = await supabase
-    .from("users")
-    .update({
-      top_pick_threshold: threshold,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", user.id);
-
-  if (updateError) {
-    console.error("Error saving top pick threshold:", updateError);
-    return { error: "Failed to save settings. Please try again." };
+  if (error) {
+    if (process.env.NODE_ENV === "development") console.error("saveSearchMode:", error);
+    return { error: "Speichern fehlgeschlagen. Bitte erneut versuchen." };
   }
 
   revalidatePath("/settings");
   revalidatePath("/dashboard");
-
   return { success: true };
 }
 
+// ── Notification Channels ─────────────────────────────────────────────────────
+
 const VALID_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
-const VALID_CHANNELS = ["email", "whatsapp", "ntfy"];
 
-export async function saveNotificationSettings(
-  prevState: NotificationPageState,
+export async function saveNotificationChannels(
+  prevState: CardState,
   formData: FormData
-): Promise<NotificationPageState> {
+): Promise<CardState> {
   const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { error: "Not authenticated" };
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { error: "Not authenticated" };
-  }
-
-  // Parse form data
   const notifyEnabled = formData.get("notify_enabled") === "true";
   const notifyFrequency = formData.get("notify_frequency") as string;
-  const notifyThreshold = parseInt(formData.get("notify_threshold") as string, 10);
   const notifyTime = parseInt(formData.get("notify_time") as string, 10);
-  const instantEnabled = formData.get("instant_alerts_enabled") === "true";
-  const instantThreshold = parseInt(formData.get("instant_alert_threshold") as string, 10);
 
   let notifyDays: string[] = [];
   try {
     notifyDays = JSON.parse(formData.get("notify_days") as string);
   } catch {
-    return { error: "Invalid weekday selection" };
+    return { error: "Ungültige Tagauswahl" };
   }
+
+  if (!["daily", "weekly"].includes(notifyFrequency)) {
+    return { error: "Ungültige Frequenz" };
+  }
+  if (isNaN(notifyTime) || notifyTime < 0 || notifyTime > 23) {
+    return { error: "Ungültige Lieferzeit" };
+  }
+  if (!notifyDays.every((d) => VALID_DAYS.includes(d))) {
+    return { error: "Ungültige Tagauswahl" };
+  }
+
+  const { error } = await supabase
+    .from("users")
+    .update({
+      notify_enabled: notifyEnabled,
+      notify_frequency: notifyFrequency,
+      notify_time: notifyTime,
+      notify_days: notifyDays,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    if (process.env.NODE_ENV === "development") console.error("saveNotificationChannels:", error);
+    return { error: "Speichern fehlgeschlagen. Bitte erneut versuchen." };
+  }
+
+  revalidatePath("/settings");
+  return { success: true };
+}
+
+// ── Instant Alerts ────────────────────────────────────────────────────────────
+
+const VALID_CHANNELS = ["email", "whatsapp", "ntfy"];
+
+export async function saveInstantAlerts(
+  prevState: CardState,
+  formData: FormData
+): Promise<CardState> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { error: "Not authenticated" };
+
+  const instantEnabled = formData.get("instant_alerts_enabled") === "true";
+  const instantThreshold = parseInt(formData.get("instant_alert_threshold") as string, 10);
+  const notifyThreshold = parseInt(formData.get("notify_threshold") as string, 10);
 
   let instantChannels: string[] = [];
   try {
     instantChannels = JSON.parse(formData.get("instant_alert_channels") as string);
   } catch {
-    return { error: "Invalid channel selection" };
+    return { error: "Ungültige Kanalauswahl" };
   }
 
-  // Validate
-  if (!["daily", "weekly"].includes(notifyFrequency)) {
-    return { error: "Invalid digest frequency" };
-  }
-  if (isNaN(notifyThreshold) || notifyThreshold < 40 || notifyThreshold > 95) {
-    return { error: "Search mode threshold must be between 40 and 95" };
-  }
-  if (isNaN(notifyTime) || notifyTime < 0 || notifyTime > 23) {
-    return { error: "Invalid delivery time" };
-  }
-  if (!notifyDays.every((d) => VALID_DAYS.includes(d))) {
-    return { error: "Invalid weekday selection" };
-  }
   if (isNaN(instantThreshold) || instantThreshold < 70 || instantThreshold > 98) {
-    return { error: "Instant alert threshold must be between 70 and 98" };
+    return { error: "Sofort-Alarm-Schwellenwert muss zwischen 70 und 98 liegen" };
   }
   if (!instantChannels.every((c) => VALID_CHANNELS.includes(c))) {
-    return { error: "Invalid channel selection" };
+    return { error: "Ungültige Kanalauswahl" };
   }
-  if (instantEnabled && instantThreshold < notifyThreshold) {
+  if (instantEnabled && !isNaN(notifyThreshold) && instantThreshold < notifyThreshold) {
     return {
-      error:
-        "Sofort-Alarm-Schwellenwert muss grösser oder gleich dem Such-Modus-Schwellenwert sein",
+      error: `Sofort-Alarm-Schwellenwert (${instantThreshold}%) muss grösser oder gleich dem Such-Modus-Schwellenwert (${notifyThreshold}%) sein`,
     };
   }
 
-  const { error: updateError } = await supabase
+  const { error } = await supabase
     .from("users")
     .update({
-      notify_enabled: notifyEnabled,
-      notify_frequency: notifyFrequency,
-      notify_threshold: notifyThreshold,
-      notify_time: notifyTime,
-      notify_days: notifyDays,
       instant_alerts_enabled: instantEnabled,
       instant_alert_threshold: instantThreshold,
       instant_alert_channels: instantChannels,
@@ -201,92 +136,41 @@ export async function saveNotificationSettings(
     })
     .eq("id", user.id);
 
-  if (updateError) {
-    console.error("Error saving notification settings:", updateError);
+  if (error) {
+    if (process.env.NODE_ENV === "development") console.error("saveInstantAlerts:", error);
+    return { error: "Speichern fehlgeschlagen. Bitte erneut versuchen." };
+  }
+
+  revalidatePath("/settings");
+  return { success: true };
+}
+
+// ── Top Pick Threshold (used by dashboard) ────────────────────────────────────
+
+export async function updateTopPickThreshold(
+  prevState: CardState,
+  formData: FormData
+): Promise<CardState> {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { error: "Not authenticated" };
+
+  const threshold = parseInt(formData.get("top_pick_threshold") as string, 10);
+  if (isNaN(threshold) || threshold < 70 || threshold > 100) {
+    return { error: "Threshold must be between 70 and 100" };
+  }
+
+  const { error } = await supabase
+    .from("users")
+    .update({ top_pick_threshold: threshold, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  if (error) {
+    if (process.env.NODE_ENV === "development") console.error("updateTopPickThreshold:", error);
     return { error: "Failed to save settings. Please try again." };
   }
 
   revalidatePath("/settings");
-
+  revalidatePath("/dashboard");
   return { success: true };
-}
-
-export async function updateEmail(
-  prevState: AccountSettingsState,
-  formData: FormData
-): Promise<AccountSettingsState> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { error: "Not authenticated" };
-  }
-
-  const newEmail = formData.get("email") as string;
-
-  if (!newEmail || !newEmail.includes("@")) {
-    return { error: "Please enter a valid email address" };
-  }
-
-  if (newEmail === user.email) {
-    return { error: "New email must be different from your current email" };
-  }
-
-  // Update email in Supabase Auth (sends verification email)
-  const { error: updateError } = await supabase.auth.updateUser({
-    email: newEmail,
-  });
-
-  if (updateError) {
-    console.error("Error updating email:", updateError);
-    return { error: updateError.message || "Failed to update email" };
-  }
-
-  return {
-    success: true,
-    message: "Verification email sent. Please check your inbox to confirm the change.",
-  };
-}
-
-export async function deleteAccount(
-  prevState: AccountSettingsState,
-  formData: FormData
-): Promise<AccountSettingsState> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return { error: "Not authenticated" };
-  }
-
-  const confirmation = formData.get("confirmation") as string;
-
-  if (confirmation !== "DELETE") {
-    return { error: "Please type DELETE to confirm account deletion" };
-  }
-
-  // Delete user data from users table first
-  const { error: deleteDataError } = await supabase
-    .from("users")
-    .delete()
-    .eq("id", user.id);
-
-  if (deleteDataError) {
-    console.error("Error deleting user data:", deleteDataError);
-    return { error: "Failed to delete account. Please try again." };
-  }
-
-  // Sign out the user
-  await supabase.auth.signOut();
-
-  // Redirect to landing page
-  redirect("/");
 }

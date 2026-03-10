@@ -155,16 +155,30 @@ function NavMain() {
             </SidebarMenuItem>
           </Collapsible>
 
-          {/* Settings */}
+          {/* Benachrichtigungen */}
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              tooltip="Settings"
+              tooltip="Benachrichtigungen"
               isActive={pathname === "/settings" || pathname.startsWith("/settings/")}
             >
               <Link href="/settings">
                 <Bell />
-                <span>Settings</span>
+                <span>Benachrichtigungen</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          {/* Account */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              tooltip="Account"
+              isActive={pathname === "/account" || pathname.startsWith("/account/")}
+            >
+              <Link href="/account">
+                <User />
+                <span>Account</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

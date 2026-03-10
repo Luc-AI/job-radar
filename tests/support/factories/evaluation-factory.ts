@@ -19,36 +19,19 @@ import type { Evaluation, EvaluationStatus } from "@/types/database";
 export function createEvaluation(
   overrides: Partial<Evaluation> = {}
 ): Evaluation {
-  const score_role = faker.number.float({ min: 5, max: 10, fractionDigits: 1 });
-  const score_company = faker.number.float({
-    min: 5,
-    max: 10,
-    fractionDigits: 1,
-  });
-  const score_location = faker.number.float({
-    min: 5,
-    max: 10,
-    fractionDigits: 1,
-  });
-  const score_industry = faker.number.float({
-    min: 5,
-    max: 10,
-    fractionDigits: 1,
-  });
-  const score_growth = faker.number.float({
-    min: 5,
-    max: 10,
-    fractionDigits: 1,
-  });
+  const score_role = faker.number.int({ min: 50, max: 100 });
+  const score_company = faker.number.int({ min: 50, max: 100 });
+  const score_location = faker.number.int({ min: 50, max: 100 });
+  const score_industry = faker.number.int({ min: 50, max: 100 });
+  const score_growth = faker.number.int({ min: 50, max: 100 });
 
   // Calculate weighted total (simplified)
   const score_total = Math.round(
-    (score_role * 0.3 +
+    score_role * 0.3 +
       score_company * 0.2 +
       score_location * 0.2 +
       score_industry * 0.15 +
-      score_growth * 0.15) *
-      10
+      score_growth * 0.15
   );
 
   return {
@@ -83,11 +66,11 @@ export function createHighScoreEvaluation(
 ): Evaluation {
   return createEvaluation({
     score_total: faker.number.int({ min: 90, max: 100 }),
-    score_role: faker.number.float({ min: 9, max: 10, fractionDigits: 1 }),
-    score_company: faker.number.float({ min: 9, max: 10, fractionDigits: 1 }),
-    score_location: faker.number.float({ min: 9, max: 10, fractionDigits: 1 }),
-    score_industry: faker.number.float({ min: 9, max: 10, fractionDigits: 1 }),
-    score_growth: faker.number.float({ min: 9, max: 10, fractionDigits: 1 }),
+    score_role: faker.number.int({ min: 90, max: 100 }),
+    score_company: faker.number.int({ min: 90, max: 100 }),
+    score_location: faker.number.int({ min: 90, max: 100 }),
+    score_industry: faker.number.int({ min: 90, max: 100 }),
+    score_growth: faker.number.int({ min: 90, max: 100 }),
     ...overrides,
   });
 }

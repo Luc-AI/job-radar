@@ -34,7 +34,7 @@ const STATUS_MESSAGES: Record<EvaluationStatus, string> = {
 };
 
 function ScoreBadge({ score, tier }: { score: number; tier?: JobTier }) {
-  const percentage = Math.round(score * 10);
+  const percentage = Math.round(score);
 
   // Tier-based colour overrides score-based colour when a tier is provided
   let className = "";
@@ -46,13 +46,13 @@ function ScoreBadge({ score, tier }: { score: number; tier?: JobTier }) {
     className = "bg-muted text-muted-foreground border-border hover:bg-muted";
   } else {
     // Fallback: score-based colour (used when no tier context, e.g. job detail page)
-    if (score >= 9) {
+    if (score >= 90) {
       className = "bg-green-100 text-green-800 border-green-200 hover:bg-green-100";
-    } else if (score >= 8) {
+    } else if (score >= 80) {
       className = "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100";
-    } else if (score >= 7) {
+    } else if (score >= 70) {
       className = "bg-sky-100 text-sky-800 border-sky-200 hover:bg-sky-100";
-    } else if (score >= 6) {
+    } else if (score >= 60) {
       className = "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100";
     } else {
       className = "bg-muted text-muted-foreground border-border hover:bg-muted";

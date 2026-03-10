@@ -137,7 +137,7 @@ export async function forgotPassword(
 
   if (error) {
     // Don't reveal if email exists or not for security
-    console.error("Password reset error:", error.message);
+    if (process.env.NODE_ENV === "development") console.error("Password reset error:", error.message);
   }
 
   // Always return success to prevent email enumeration attacks

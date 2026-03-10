@@ -49,12 +49,14 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     notFound();
   }
 
-  // Mark as viewed if currently "new"
+  // Mark as viewed if currently "new" — filter by user_id to prevent cross-user mutation
   if (evaluation.status === "new") {
     await supabase
       .from("evaluations")
       .update({ status: "viewed" })
-      .eq("uuid_evaluation", id);
+      .eq("uuid_evaluation", id)
+      .eq("user_id", user.id)
+      .eq("status", "new");
   }
 
   // Format salary range
@@ -278,16 +280,17 @@ function ScoreBadge({
   score: number;
   size?: "md" | "lg";
 }) {
-  const percentage = Math.round(score * 10);
+  // Scores are stored as 1-100 integers (migration 011_scores_to_100_scale)
+  const percentage = score;
 
   let colorClasses: string;
-  if (score >= 9) {
+  if (score >= 90) {
     colorClasses = "bg-green-100 text-green-800 border-green-200";
-  } else if (score >= 8) {
+  } else if (score >= 80) {
     colorClasses = "bg-blue-100 text-blue-800 border-blue-200";
-  } else if (score >= 7) {
+  } else if (score >= 70) {
     colorClasses = "bg-sky-100 text-sky-800 border-sky-200";
-  } else if (score >= 6) {
+  } else if (score >= 60) {
     colorClasses = "bg-amber-100 text-amber-800 border-amber-200";
   } else {
     colorClasses = "bg-muted text-muted-foreground border-border";
